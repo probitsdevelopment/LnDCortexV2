@@ -1,6 +1,6 @@
 import { t } from '@lingui/core/macro';
 
-import { UniqueConstraintCondition } from 'src/engine/twenty-orm/entity-manager/types/relation-connect-query-config.type';
+import { type UniqueConstraintCondition } from 'src/engine/twenty-orm/entity-manager/types/relation-connect-query-config.type';
 
 export const formatConnectRecordNotFoundErrorMessage = (
   connectFieldName: string,
@@ -13,6 +13,6 @@ export const formatConnectRecordNotFoundErrorMessage = (
 
   return {
     errorMessage: `Expected 1 record to connect to ${connectFieldName}, but found ${recordToConnectTotal} for ${formattedConnectCondition}`,
-    userFriendlyMessage: t`Expected 1 record to connect to ${connectFieldName}, but found ${recordToConnectTotal} for ${formattedConnectCondition}`,
+    userFriendlyMessage: t`Can't connect to ${connectFieldName}. No unique record found with condition: ${formattedConnectCondition}`,
   };
 };

@@ -1,17 +1,14 @@
 import { mapObjectMetadataToGraphQLQuery } from '@/object-metadata/utils/mapObjectMetadataToGraphQLQuery';
 import { isUndefined } from '@sniptt/guards';
-import {
-  FieldMetadataType,
-  ObjectPermission,
-  RelationType,
-} from '~/generated-metadata/graphql';
+import { FieldMetadataType, RelationType } from '~/generated-metadata/graphql';
 
-import { ObjectMetadataItem } from '@/object-metadata/types/ObjectMetadataItem';
+import { type ObjectMetadataItem } from '@/object-metadata/types/ObjectMetadataItem';
 import { getObjectPermissionsForObject } from '@/object-metadata/utils/getObjectPermissionsForObject';
-import { RecordGqlFields } from '@/object-record/graphql/types/RecordGqlFields';
+import { type RecordGqlFields } from '@/object-record/graphql/types/RecordGqlFields';
 import { isNonCompositeField } from '@/object-record/object-filter-dropdown/utils/isNonCompositeField';
+import { type ObjectPermissions } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
-import { FieldMetadataItem } from '../types/FieldMetadataItem';
+import { type FieldMetadataItem } from '../types/FieldMetadataItem';
 
 type MapFieldMetadataToGraphQLQueryArgs = {
   objectMetadataItems: ObjectMetadataItem[];
@@ -22,8 +19,10 @@ type MapFieldMetadataToGraphQLQueryArgs = {
   >;
   relationRecordGqlFields?: RecordGqlFields;
   computeReferences?: boolean;
-  objectPermissionsByObjectMetadataId: Record<string, ObjectPermission>;
-  isFieldsPermissionsEnabled?: boolean;
+  objectPermissionsByObjectMetadataId: Record<
+    string,
+    ObjectPermissions & { objectMetadataId: string }
+  >;
 };
 // TODO: change ObjectMetadataItems mock before refactoring with relation computed field
 export const mapFieldMetadataToGraphQLQuery = ({
@@ -33,16 +32,10 @@ export const mapFieldMetadataToGraphQLQuery = ({
   relationRecordGqlFields,
   computeReferences = false,
   objectPermissionsByObjectMetadataId,
-  isFieldsPermissionsEnabled,
 }: MapFieldMetadataToGraphQLQueryArgs): string => {
   const fieldType = fieldMetadata.type;
 
   const fieldIsNonCompositeField = isNonCompositeField(fieldType);
-
-  const objectPermission = getObjectPermissionsForObject(
-    objectPermissionsByObjectMetadataId,
-    fieldMetadata.relation?.targetObjectMetadata.id,
-  );
 
   if (fieldIsNonCompositeField) {
     return gqlField;
@@ -66,6 +59,17 @@ export const mapFieldMetadataToGraphQLQuery = ({
       isDefined(objectPermissionsByObjectMetadataId) &&
       isDefined(relationMetadataItem.id)
     ) {
+      if (!isDefined(fieldMetadata.relation?.targetObjectMetadata.id)) {
+        throw new Error(
+          `Target object metadata id not found with field metadata ${fieldMetadata.name}`,
+        );
+      }
+
+      const objectPermission = getObjectPermissionsForObject(
+        objectPermissionsByObjectMetadataId,
+        fieldMetadata.relation?.targetObjectMetadata.id,
+      );
+
       if (!objectPermission.canReadObjectRecords) {
         return '';
       }
@@ -83,7 +87,6 @@ ${mapObjectMetadataToGraphQLQuery({
   computeReferences: computeReferences,
   isRootLevel: false,
   objectPermissionsByObjectMetadataId,
-  isFieldsPermissionsEnabled,
 })}`;
   }
 
@@ -105,6 +108,17 @@ ${mapObjectMetadataToGraphQLQuery({
       isDefined(objectPermissionsByObjectMetadataId) &&
       isDefined(relationMetadataItem.id)
     ) {
+      if (!isDefined(fieldMetadata.relation?.targetObjectMetadata.id)) {
+        throw new Error(
+          `Target object metadata id not found with field metadata ${fieldMetadata.name}`,
+        );
+      }
+
+      const objectPermission = getObjectPermissionsForObject(
+        objectPermissionsByObjectMetadataId,
+        fieldMetadata.relation?.targetObjectMetadata.id,
+      );
+
       if (!objectPermission.canReadObjectRecords) {
         return '';
       }
@@ -120,7 +134,6 @@ ${mapObjectMetadataToGraphQLQuery({
       computeReferences,
       isRootLevel: false,
       objectPermissionsByObjectMetadataId,
-      isFieldsPermissionsEnabled,
     })}
   }
 }`;

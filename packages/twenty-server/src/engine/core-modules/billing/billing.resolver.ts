@@ -3,7 +3,6 @@
 import { UseFilters, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
-import { isDefined } from 'twenty-shared/utils';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 
 import { BillingCheckoutSessionInput } from 'src/engine/core-modules/billing/dtos/inputs/billing-checkout-session.input';
@@ -19,7 +18,7 @@ import { BillingPortalWorkspaceService } from 'src/engine/core-modules/billing/s
 import { BillingSubscriptionService } from 'src/engine/core-modules/billing/services/billing-subscription.service';
 import { BillingUsageService } from 'src/engine/core-modules/billing/services/billing-usage.service';
 import { BillingService } from 'src/engine/core-modules/billing/services/billing.service';
-import { BillingPortalCheckoutSessionParameters } from 'src/engine/core-modules/billing/types/billing-portal-checkout-session-parameters.type';
+import { type BillingPortalCheckoutSessionParameters } from 'src/engine/core-modules/billing/types/billing-portal-checkout-session-parameters.type';
 import { formatBillingDatabaseProductToGraphqlDTO } from 'src/engine/core-modules/billing/utils/format-database-product-to-graphql-dto.util';
 import { PreventNestToAutoLogGraphqlErrorsFilter } from 'src/engine/core-modules/graphql/filters/prevent-nest-to-auto-log-graphql-errors.filter';
 import { ResolverValidationPipe } from 'src/engine/core-modules/graphql/pipes/resolver-validation.pipe';
@@ -92,7 +91,7 @@ export class BillingResolver {
     await this.validateCanCheckoutSessionPermissionOrThrow({
       workspaceId: workspace.id,
       userWorkspaceId,
-      isExecutedByApiKey: isDefined(apiKey),
+      apiKeyId: apiKey,
       workspaceActivationStatus: workspace.activationStatus,
     });
 
@@ -110,15 +109,30 @@ export class BillingResolver {
         interval: recurringInterval,
       },
     );
-    const checkoutSessionURL =
-      await this.billingPortalWorkspaceService.computeCheckoutSessionURL({
-        ...checkoutSessionParams,
-        billingPricesPerPlan,
-      });
 
-    return {
-      url: checkoutSessionURL,
-    };
+    // For 7-day trials (no payment method required), create subscription directly
+    // For 30-day trials (payment method required), use checkout session flow
+    if (!requirePaymentMethod) {
+      const successUrl =
+        await this.billingPortalWorkspaceService.createDirectSubscription({
+          ...checkoutSessionParams,
+          billingPricesPerPlan,
+        });
+
+      return {
+        url: successUrl,
+      };
+    } else {
+      const checkoutSessionURL =
+        await this.billingPortalWorkspaceService.computeCheckoutSessionURL({
+          ...checkoutSessionParams,
+          billingPricesPerPlan,
+        });
+
+      return {
+        url: checkoutSessionURL,
+      };
+    }
   }
 
   @Mutation(() => BillingUpdateOutput)
@@ -176,12 +190,12 @@ export class BillingResolver {
   private async validateCanCheckoutSessionPermissionOrThrow({
     workspaceId,
     userWorkspaceId,
-    isExecutedByApiKey,
+    apiKeyId,
     workspaceActivationStatus,
   }: {
     workspaceId: string;
     userWorkspaceId: string;
-    isExecutedByApiKey: boolean;
+    apiKeyId?: string;
     workspaceActivationStatus: WorkspaceActivationStatus;
   }) {
     if (
@@ -200,7 +214,7 @@ export class BillingResolver {
         userWorkspaceId,
         workspaceId,
         setting: PermissionFlagType.WORKSPACE,
-        isExecutedByApiKey,
+        apiKeyId,
       });
 
     if (!userHasPermission) {

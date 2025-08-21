@@ -1,5 +1,5 @@
 import {
-  ExecutionContext,
+  type ExecutionContext,
   UseFilters,
   UseGuards,
   UsePipes,
@@ -25,7 +25,6 @@ import { FileFolder } from 'src/engine/core-modules/file/interfaces/file-folder.
 
 import { BillingSubscription } from 'src/engine/core-modules/billing/entities/billing-subscription.entity';
 import { BillingSubscriptionService } from 'src/engine/core-modules/billing/services/billing-subscription.service';
-import { CustomDomainValidRecords } from 'src/engine/core-modules/domain-manager/dtos/custom-domain-valid-records';
 import { DomainManagerService } from 'src/engine/core-modules/domain-manager/services/domain-manager.service';
 import { FeatureFlagDTO } from 'src/engine/core-modules/feature-flag/dtos/feature-flag-dto';
 import { FeatureFlagKey } from 'src/engine/core-modules/feature-flag/enums/feature-flag-key.enum';
@@ -38,9 +37,11 @@ import { ResolverValidationPipe } from 'src/engine/core-modules/graphql/pipes/re
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
 import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/user-workspace.service';
 import { User } from 'src/engine/core-modules/user/user.entity';
+import { ViewDTO } from 'src/engine/core-modules/view/dtos/view.dto';
+import { ViewService } from 'src/engine/core-modules/view/services/view.service';
 import { ActivateWorkspaceInput } from 'src/engine/core-modules/workspace/dtos/activate-workspace-input';
 import {
-  AuthProviders,
+  type AuthProviders,
   PublicWorkspaceDataOutput,
 } from 'src/engine/core-modules/workspace/dtos/public-workspace-data-output';
 import { UpdateWorkspaceInput } from 'src/engine/core-modules/workspace/dtos/update-workspace-input';
@@ -70,7 +71,7 @@ import { Workspace } from './workspace.entity';
 import { WorkspaceService } from './services/workspace.service';
 
 const OriginHeader = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
+  (_: unknown, ctx: ExecutionContext) => {
     const request = getRequest(ctx);
 
     return request.headers['origin'];
@@ -95,6 +96,7 @@ export class WorkspaceResolver {
     private readonly featureFlagService: FeatureFlagService,
     private readonly roleService: RoleService,
     private readonly agentService: AgentService,
+    private readonly viewService: ViewService,
     @InjectRepository(BillingSubscription, 'core')
     private readonly billingSubscriptionRepository: Repository<BillingSubscription>,
   ) {}
@@ -242,7 +244,7 @@ export class WorkspaceResolver {
         ...agent,
         roleId: agent.roleId ?? undefined,
       };
-    } catch (error) {
+    } catch {
       // If agent is not found, return null instead of throwing
       return null;
     }
@@ -276,7 +278,7 @@ export class WorkspaceResolver {
           url: workspace.logo,
           workspaceId: workspace.id,
         });
-      } catch (e) {
+      } catch {
         return workspace.logo;
       }
     }
@@ -318,12 +320,9 @@ export class WorkspaceResolver {
     );
   }
 
-  @Mutation(() => CustomDomainValidRecords, { nullable: true })
-  @UseGuards(WorkspaceAuthGuard)
-  async checkCustomDomainValidRecords(
-    @AuthWorkspace() workspace: Workspace,
-  ): Promise<CustomDomainValidRecords | undefined> {
-    return this.workspaceService.checkCustomDomainValidRecords(workspace);
+  @ResolveField(() => [ViewDTO])
+  async views(@Parent() workspace: Workspace): Promise<ViewDTO[]> {
+    return this.viewService.findByWorkspaceId(workspace.id);
   }
 
   @Query(() => PublicWorkspaceDataOutput)
@@ -369,7 +368,7 @@ export class WorkspaceResolver {
             url: workspace.logo,
             workspaceId: workspace.id,
           });
-        } catch (e) {
+        } catch {
           workspaceLogoWithToken = workspace.logo;
         }
       }

@@ -31,7 +31,7 @@ export type AdminPanelHealthServiceData = {
   description: Scalars['String'];
   details?: Maybe<Scalars['String']>;
   errorMessage?: Maybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: HealthIndicatorId;
   label: Scalars['String'];
   queues?: Maybe<Array<AdminPanelWorkerQueueHealth>>;
   status: AdminPanelHealthServiceStatus;
@@ -44,7 +44,7 @@ export enum AdminPanelHealthServiceStatus {
 
 export type AdminPanelWorkerQueueHealth = {
   __typename?: 'AdminPanelWorkerQueueHealth';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   queueName: Scalars['String'];
   status: AdminPanelHealthServiceStatus;
 };
@@ -53,7 +53,10 @@ export type Agent = {
   __typename?: 'Agent';
   createdAt: Scalars['DateTime'];
   description?: Maybe<Scalars['String']>;
+  icon?: Maybe<Scalars['String']>;
   id: Scalars['UUID'];
+  isCustom: Scalars['Boolean'];
+  label: Scalars['String'];
   modelId: Scalars['String'];
   name: Scalars['String'];
   prompt: Scalars['String'];
@@ -81,10 +84,32 @@ export type AgentChatThread = {
   updatedAt: Scalars['DateTime'];
 };
 
+export type AgentHandoffDto = {
+  __typename?: 'AgentHandoffDTO';
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['UUID'];
+  toAgent: Agent;
+};
+
 export type AgentIdInput = {
   /** The id of the agent. */
   id: Scalars['UUID'];
 };
+
+export enum AggregateOperations {
+  AVG = 'AVG',
+  COUNT = 'COUNT',
+  COUNT_EMPTY = 'COUNT_EMPTY',
+  COUNT_FALSE = 'COUNT_FALSE',
+  COUNT_NOT_EMPTY = 'COUNT_NOT_EMPTY',
+  COUNT_TRUE = 'COUNT_TRUE',
+  COUNT_UNIQUE_VALUES = 'COUNT_UNIQUE_VALUES',
+  MAX = 'MAX',
+  MIN = 'MIN',
+  PERCENTAGE_EMPTY = 'PERCENTAGE_EMPTY',
+  PERCENTAGE_NOT_EMPTY = 'PERCENTAGE_NOT_EMPTY',
+  SUM = 'SUM'
+}
 
 export type Analytics = {
   __typename?: 'Analytics';
@@ -109,9 +134,10 @@ export type ApiKey = {
   id: Scalars['UUID'];
   name: Scalars['String'];
   revokedAt?: Maybe<Scalars['DateTime']>;
+  role?: Maybe<Role>;
   updatedAt: Scalars['DateTime'];
   workspace: Workspace;
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type ApiKeyToken = {
@@ -161,7 +187,7 @@ export type AuthToken = {
 
 export type AuthTokenPair = {
   __typename?: 'AuthTokenPair';
-  accessToken: AuthToken;
+  accessOrWorkspaceAgnosticToken: AuthToken;
   refreshToken: AuthToken;
 };
 
@@ -184,7 +210,7 @@ export type AutocompleteResultDto = {
 export type AvailableWorkspace = {
   __typename?: 'AvailableWorkspace';
   displayName?: Maybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   inviteHash?: Maybe<Scalars['String']>;
   loginToken?: Maybe<Scalars['String']>;
   logo?: Maybe<Scalars['String']>;
@@ -445,10 +471,10 @@ export type ConfigVariablesOutput = {
 
 export type ConnectedImapSmtpCaldavAccount = {
   __typename?: 'ConnectedImapSmtpCaldavAccount';
-  accountOwnerId: Scalars['String'];
+  accountOwnerId: Scalars['UUID'];
   connectionParameters?: Maybe<ImapSmtpCaldavConnectionParameters>;
   handle: Scalars['String'];
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   provider: Scalars['String'];
 };
 
@@ -469,14 +495,128 @@ export type ConnectionParametersOutput = {
   username?: Maybe<Scalars['String']>;
 };
 
+export type CoreView = {
+  __typename?: 'CoreView';
+  anyFieldFilterValue?: Maybe<Scalars['String']>;
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  icon: Scalars['String'];
+  id: Scalars['UUID'];
+  isCompact: Scalars['Boolean'];
+  isCustom: Scalars['Boolean'];
+  kanbanAggregateOperation?: Maybe<AggregateOperations>;
+  kanbanAggregateOperationFieldMetadataId?: Maybe<Scalars['UUID']>;
+  key?: Maybe<ViewKey>;
+  name: Scalars['String'];
+  objectMetadataId: Scalars['UUID'];
+  openRecordIn: ViewOpenRecordIn;
+  position: Scalars['Float'];
+  type: ViewType;
+  updatedAt: Scalars['DateTime'];
+  viewFields: Array<CoreViewField>;
+  viewFilterGroups: Array<CoreViewFilterGroup>;
+  viewFilters: Array<CoreViewFilter>;
+  viewGroups: Array<CoreViewGroup>;
+  viewSorts: Array<CoreViewSort>;
+  workspaceId: Scalars['UUID'];
+};
+
+export type CoreViewField = {
+  __typename?: 'CoreViewField';
+  aggregateOperation?: Maybe<AggregateOperations>;
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  fieldMetadataId: Scalars['UUID'];
+  id: Scalars['UUID'];
+  isVisible: Scalars['Boolean'];
+  position: Scalars['Float'];
+  size: Scalars['Float'];
+  updatedAt: Scalars['DateTime'];
+  viewId: Scalars['UUID'];
+  workspaceId: Scalars['UUID'];
+};
+
+export type CoreViewFilter = {
+  __typename?: 'CoreViewFilter';
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  fieldMetadataId: Scalars['UUID'];
+  id: Scalars['UUID'];
+  operand: ViewFilterOperand;
+  positionInViewFilterGroup?: Maybe<Scalars['Float']>;
+  subFieldName?: Maybe<Scalars['String']>;
+  updatedAt: Scalars['DateTime'];
+  value: Scalars['JSON'];
+  viewFilterGroupId?: Maybe<Scalars['UUID']>;
+  viewId: Scalars['UUID'];
+  workspaceId: Scalars['UUID'];
+};
+
+export type CoreViewFilterGroup = {
+  __typename?: 'CoreViewFilterGroup';
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  id: Scalars['UUID'];
+  logicalOperator: ViewFilterGroupLogicalOperator;
+  parentViewFilterGroupId?: Maybe<Scalars['UUID']>;
+  positionInViewFilterGroup?: Maybe<Scalars['Float']>;
+  updatedAt: Scalars['DateTime'];
+  viewId: Scalars['UUID'];
+  workspaceId: Scalars['UUID'];
+};
+
+export type CoreViewGroup = {
+  __typename?: 'CoreViewGroup';
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  fieldMetadataId: Scalars['UUID'];
+  fieldValue: Scalars['String'];
+  id: Scalars['UUID'];
+  isVisible: Scalars['Boolean'];
+  position: Scalars['Float'];
+  updatedAt: Scalars['DateTime'];
+  viewId: Scalars['UUID'];
+  workspaceId: Scalars['UUID'];
+};
+
+export type CoreViewSort = {
+  __typename?: 'CoreViewSort';
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  direction: ViewSortDirection;
+  fieldMetadataId: Scalars['UUID'];
+  id: Scalars['UUID'];
+  updatedAt: Scalars['DateTime'];
+  viewId: Scalars['UUID'];
+  workspaceId: Scalars['UUID'];
+};
+
 export type CreateAgentChatThreadInput = {
   agentId: Scalars['UUID'];
+};
+
+export type CreateAgentHandoffInput = {
+  description?: InputMaybe<Scalars['String']>;
+  fromAgentId: Scalars['UUID'];
+  toAgentId: Scalars['UUID'];
+};
+
+export type CreateAgentInput = {
+  description?: InputMaybe<Scalars['String']>;
+  icon?: InputMaybe<Scalars['String']>;
+  label: Scalars['String'];
+  modelId: Scalars['String'];
+  name?: InputMaybe<Scalars['String']>;
+  prompt: Scalars['String'];
+  responseFormat?: InputMaybe<Scalars['JSON']>;
+  roleId?: InputMaybe<Scalars['UUID']>;
 };
 
 export type CreateApiKeyDto = {
   expiresAt: Scalars['String'];
   name: Scalars['String'];
   revokedAt?: InputMaybe<Scalars['String']>;
+  roleId: Scalars['UUID'];
 };
 
 export type CreateApprovedAccessDomainInput = {
@@ -486,9 +626,9 @@ export type CreateApprovedAccessDomainInput = {
 
 export type CreateDraftFromWorkflowVersionInput = {
   /** Workflow ID */
-  workflowId: Scalars['String'];
+  workflowId: Scalars['UUID'];
   /** Workflow version ID */
-  workflowVersionIdToCopy: Scalars['String'];
+  workflowVersionIdToCopy: Scalars['UUID'];
 };
 
 export type CreateFieldInput = {
@@ -501,11 +641,12 @@ export type CreateFieldInput = {
   isNullable?: InputMaybe<Scalars['Boolean']>;
   isRemoteCreation?: InputMaybe<Scalars['Boolean']>;
   isSystem?: InputMaybe<Scalars['Boolean']>;
+  isUIReadOnly?: InputMaybe<Scalars['Boolean']>;
   isUnique?: InputMaybe<Scalars['Boolean']>;
   label: Scalars['String'];
   morphRelationsCreationPayload?: InputMaybe<Array<Scalars['JSON']>>;
   name: Scalars['String'];
-  objectMetadataId: Scalars['String'];
+  objectMetadataId: Scalars['UUID'];
   options?: InputMaybe<Scalars['JSON']>;
   relationCreationPayload?: InputMaybe<Scalars['JSON']>;
   settings?: InputMaybe<Scalars['JSON']>;
@@ -536,6 +677,60 @@ export type CreateServerlessFunctionInput = {
   timeoutSeconds?: InputMaybe<Scalars['Float']>;
 };
 
+export type CreateViewFieldInput = {
+  aggregateOperation?: InputMaybe<AggregateOperations>;
+  fieldMetadataId: Scalars['UUID'];
+  isVisible?: InputMaybe<Scalars['Boolean']>;
+  position?: InputMaybe<Scalars['Float']>;
+  size?: InputMaybe<Scalars['Float']>;
+  viewId: Scalars['UUID'];
+};
+
+export type CreateViewFilterGroupInput = {
+  logicalOperator?: InputMaybe<ViewFilterGroupLogicalOperator>;
+  parentViewFilterGroupId?: InputMaybe<Scalars['UUID']>;
+  positionInViewFilterGroup?: InputMaybe<Scalars['Float']>;
+  viewId: Scalars['UUID'];
+};
+
+export type CreateViewFilterInput = {
+  fieldMetadataId: Scalars['UUID'];
+  operand?: InputMaybe<ViewFilterOperand>;
+  positionInViewFilterGroup?: InputMaybe<Scalars['Float']>;
+  subFieldName?: InputMaybe<Scalars['String']>;
+  value: Scalars['JSON'];
+  viewFilterGroupId?: InputMaybe<Scalars['UUID']>;
+  viewId: Scalars['UUID'];
+};
+
+export type CreateViewGroupInput = {
+  fieldMetadataId: Scalars['UUID'];
+  fieldValue: Scalars['String'];
+  isVisible?: InputMaybe<Scalars['Boolean']>;
+  position?: InputMaybe<Scalars['Float']>;
+  viewId: Scalars['UUID'];
+};
+
+export type CreateViewInput = {
+  anyFieldFilterValue?: InputMaybe<Scalars['String']>;
+  icon: Scalars['String'];
+  isCompact?: InputMaybe<Scalars['Boolean']>;
+  kanbanAggregateOperation?: InputMaybe<AggregateOperations>;
+  kanbanAggregateOperationFieldMetadataId?: InputMaybe<Scalars['UUID']>;
+  key?: InputMaybe<ViewKey>;
+  name: Scalars['String'];
+  objectMetadataId: Scalars['UUID'];
+  openRecordIn?: InputMaybe<ViewOpenRecordIn>;
+  position?: InputMaybe<Scalars['Float']>;
+  type?: InputMaybe<ViewType>;
+};
+
+export type CreateViewSortInput = {
+  direction?: InputMaybe<ViewSortDirection>;
+  fieldMetadataId: Scalars['UUID'];
+  viewId: Scalars['UUID'];
+};
+
 export type CreateWebhookDto = {
   description?: InputMaybe<Scalars['String']>;
   operations: Array<Scalars['String']>;
@@ -543,15 +738,26 @@ export type CreateWebhookDto = {
   targetUrl: Scalars['String'];
 };
 
+export type CreateWorkflowVersionEdgeInput = {
+  /** Workflow version source step ID */
+  source: Scalars['String'];
+  /** Workflow version target step ID */
+  target: Scalars['String'];
+  /** Workflow version ID */
+  workflowVersionId: Scalars['String'];
+};
+
 export type CreateWorkflowVersionStepInput = {
   /** Next step ID */
-  nextStepId?: InputMaybe<Scalars['String']>;
+  nextStepId?: InputMaybe<Scalars['UUID']>;
   /** Parent step ID */
   parentStepId?: InputMaybe<Scalars['String']>;
+  /** Step position */
+  position?: InputMaybe<WorkflowStepPositionInput>;
   /** New step type */
   stepType: Scalars['String'];
   /** Workflow version ID */
-  workflowVersionId: Scalars['String'];
+  workflowVersionId: Scalars['UUID'];
 };
 
 export type CursorPaging = {
@@ -577,7 +783,7 @@ export type CustomDomainRecord = {
 export type CustomDomainValidRecords = {
   __typename?: 'CustomDomainValidRecords';
   customDomain: Scalars['String'];
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   records: Array<CustomDomainRecord>;
 };
 
@@ -602,7 +808,7 @@ export type DateFilter = {
 };
 
 export type DeleteApprovedAccessDomainInput = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export type DeleteOneFieldInput = {
@@ -616,12 +822,12 @@ export type DeleteOneObjectInput = {
 };
 
 export type DeleteSsoInput = {
-  identityProviderId: Scalars['String'];
+  identityProviderId: Scalars['UUID'];
 };
 
 export type DeleteSsoOutput = {
   __typename?: 'DeleteSsoOutput';
-  identityProviderId: Scalars['String'];
+  identityProviderId: Scalars['UUID'];
 };
 
 export type DeleteTwoFactorAuthenticationMethodOutput = {
@@ -631,14 +837,14 @@ export type DeleteTwoFactorAuthenticationMethodOutput = {
 };
 
 export type DeleteWebhookDto = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export type DeleteWorkflowVersionStepInput = {
   /** Step to delete ID */
   stepId: Scalars['String'];
   /** Workflow version ID */
-  workflowVersionId: Scalars['String'];
+  workflowVersionId: Scalars['UUID'];
 };
 
 export type DeletedWorkspaceMember = {
@@ -647,7 +853,7 @@ export type DeletedWorkspaceMember = {
   id: Scalars['UUID'];
   name: FullName;
   userEmail: Scalars['String'];
-  userWorkspaceId?: Maybe<Scalars['String']>;
+  userWorkspaceId?: Maybe<Scalars['UUID']>;
 };
 
 /** Schema update on a table */
@@ -659,13 +865,13 @@ export enum DistantTableUpdate {
 }
 
 export type EditSsoInput = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   status: SsoIdentityProviderStatus;
 };
 
 export type EditSsoOutput = {
   __typename?: 'EditSsoOutput';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   issuer: Scalars['String'];
   name: Scalars['String'];
   status: SsoIdentityProviderStatus;
@@ -698,7 +904,7 @@ export type FeatureFlag = {
   id: Scalars['UUID'];
   key: FeatureFlagKey;
   value: Scalars['Boolean'];
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type FeatureFlagDto = {
@@ -710,18 +916,17 @@ export type FeatureFlagDto = {
 export enum FeatureFlagKey {
   IS_AIRTABLE_INTEGRATION_ENABLED = 'IS_AIRTABLE_INTEGRATION_ENABLED',
   IS_AI_ENABLED = 'IS_AI_ENABLED',
+  IS_API_KEY_ROLES_ENABLED = 'IS_API_KEY_ROLES_ENABLED',
+  IS_CORE_VIEW_ENABLED = 'IS_CORE_VIEW_ENABLED',
   IS_CORE_VIEW_SYNCING_ENABLED = 'IS_CORE_VIEW_SYNCING_ENABLED',
-  IS_FIELDS_PERMISSIONS_ENABLED = 'IS_FIELDS_PERMISSIONS_ENABLED',
   IS_IMAP_SMTP_CALDAV_ENABLED = 'IS_IMAP_SMTP_CALDAV_ENABLED',
   IS_JSON_FILTER_ENABLED = 'IS_JSON_FILTER_ENABLED',
   IS_MORPH_RELATION_ENABLED = 'IS_MORPH_RELATION_ENABLED',
   IS_POSTGRESQL_INTEGRATION_ENABLED = 'IS_POSTGRESQL_INTEGRATION_ENABLED',
   IS_RELATION_CONNECT_ENABLED = 'IS_RELATION_CONNECT_ENABLED',
   IS_STRIPE_INTEGRATION_ENABLED = 'IS_STRIPE_INTEGRATION_ENABLED',
-  IS_TWO_FACTOR_AUTHENTICATION_ENABLED = 'IS_TWO_FACTOR_AUTHENTICATION_ENABLED',
   IS_UNIQUE_INDEXES_ENABLED = 'IS_UNIQUE_INDEXES_ENABLED',
-  IS_WORKFLOW_FILTERING_ENABLED = 'IS_WORKFLOW_FILTERING_ENABLED',
-  IS_WORKSPACE_API_KEY_WEBHOOK_GRAPHQL_ENABLED = 'IS_WORKSPACE_API_KEY_WEBHOOK_GRAPHQL_ENABLED',
+  IS_WORKFLOW_BRANCH_ENABLED = 'IS_WORKFLOW_BRANCH_ENABLED',
   IS_WORKSPACE_MIGRATION_V2_ENABLED = 'IS_WORKSPACE_MIGRATION_V2_ENABLED'
 }
 
@@ -737,6 +942,7 @@ export type Field = {
   isLabelSyncedWithName?: Maybe<Scalars['Boolean']>;
   isNullable?: Maybe<Scalars['Boolean']>;
   isSystem?: Maybe<Scalars['Boolean']>;
+  isUIReadOnly?: Maybe<Scalars['Boolean']>;
   isUnique?: Maybe<Scalars['Boolean']>;
   label: Scalars['String'];
   morphRelations?: Maybe<Array<Relation>>;
@@ -772,6 +978,7 @@ export type FieldFilter = {
   isActive?: InputMaybe<BooleanFieldComparison>;
   isCustom?: InputMaybe<BooleanFieldComparison>;
   isSystem?: InputMaybe<BooleanFieldComparison>;
+  isUIReadOnly?: InputMaybe<BooleanFieldComparison>;
   or?: InputMaybe<Array<FieldFilter>>;
 };
 
@@ -808,25 +1015,25 @@ export type FieldPermission = {
   __typename?: 'FieldPermission';
   canReadFieldValue?: Maybe<Scalars['Boolean']>;
   canUpdateFieldValue?: Maybe<Scalars['Boolean']>;
-  fieldMetadataId: Scalars['String'];
-  id: Scalars['String'];
-  objectMetadataId: Scalars['String'];
-  roleId: Scalars['String'];
+  fieldMetadataId: Scalars['UUID'];
+  id: Scalars['UUID'];
+  objectMetadataId: Scalars['UUID'];
+  roleId: Scalars['UUID'];
 };
 
 export type FieldPermissionInput = {
   canReadFieldValue?: InputMaybe<Scalars['Boolean']>;
   canUpdateFieldValue?: InputMaybe<Scalars['Boolean']>;
-  fieldMetadataId: Scalars['String'];
-  objectMetadataId: Scalars['String'];
+  fieldMetadataId: Scalars['UUID'];
+  objectMetadataId: Scalars['UUID'];
 };
 
 export type File = {
   __typename?: 'File';
   createdAt: Scalars['DateTime'];
   fullPath: Scalars['String'];
-  id: Scalars['ID'];
-  messageId?: Maybe<Scalars['ID']>;
+  id: Scalars['UUID'];
+  messageId?: Maybe<Scalars['UUID']>;
   name: Scalars['String'];
   size: Scalars['Float'];
   type: Scalars['String'];
@@ -848,7 +1055,7 @@ export enum FilterIs {
 
 export type FindAvailableSsoidpOutput = {
   __typename?: 'FindAvailableSSOIDPOutput';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   issuer: Scalars['String'];
   name: Scalars['String'];
   status: SsoIdentityProviderStatus;
@@ -863,18 +1070,18 @@ export type FullName = {
 };
 
 export type GetApiKeyDto = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export type GetAuthorizationUrlForSsoInput = {
-  identityProviderId: Scalars['String'];
+  identityProviderId: Scalars['UUID'];
   workspaceInviteHash?: InputMaybe<Scalars['String']>;
 };
 
 export type GetAuthorizationUrlForSsoOutput = {
   __typename?: 'GetAuthorizationUrlForSSOOutput';
   authorizationURL: Scalars['String'];
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   type: Scalars['String'];
 };
 
@@ -892,7 +1099,7 @@ export type GetServerlessFunctionSourceCodeInput = {
 };
 
 export type GetWebhookDto = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export enum HealthIndicatorId {
@@ -1075,18 +1282,27 @@ export type Mutation = {
   activateWorkflowVersion: Scalars['Boolean'];
   activateWorkspace: Workspace;
   assignRoleToAgent: Scalars['Boolean'];
+  assignRoleToApiKey: Scalars['Boolean'];
   authorizeApp: AuthorizeApp;
   checkCustomDomainValidRecords?: Maybe<CustomDomainValidRecords>;
   checkoutSession: BillingSessionOutput;
   computeStepOutputSchema: Scalars['JSON'];
   createAgentChatThread: AgentChatThread;
+  createAgentHandoff: Scalars['Boolean'];
   createApiKey: ApiKey;
   createApprovedAccessDomain: ApprovedAccessDomain;
+  createCoreView: CoreView;
+  createCoreViewField: CoreViewField;
+  createCoreViewFilter: CoreViewFilter;
+  createCoreViewFilterGroup: CoreViewFilterGroup;
+  createCoreViewGroup: CoreViewGroup;
+  createCoreViewSort: CoreViewSort;
   createDatabaseConfigVariable: Scalars['Boolean'];
   createDraftFromWorkflowVersion: WorkflowVersion;
   createFile: File;
   createOIDCIdentityProvider: SetupSsoOutput;
   createObjectEvent: Analytics;
+  createOneAgent: Agent;
   createOneAppToken: AppToken;
   createOneField: Field;
   createOneObject: Object;
@@ -1094,12 +1310,20 @@ export type Mutation = {
   createOneServerlessFunction: ServerlessFunction;
   createSAMLIdentityProvider: SetupSsoOutput;
   createWebhook: Webhook;
-  createWorkflowVersionStep: WorkflowAction;
+  createWorkflowVersionEdge: WorkflowVersionStepChanges;
+  createWorkflowVersionStep: WorkflowVersionStepChanges;
   deactivateWorkflowVersion: Scalars['Boolean'];
   deleteApprovedAccessDomain: Scalars['Boolean'];
+  deleteCoreView: Scalars['Boolean'];
+  deleteCoreViewField: Scalars['Boolean'];
+  deleteCoreViewFilter: Scalars['Boolean'];
+  deleteCoreViewFilterGroup: Scalars['Boolean'];
+  deleteCoreViewGroup: Scalars['Boolean'];
+  deleteCoreViewSort: Scalars['Boolean'];
   deleteCurrentWorkspace: Workspace;
   deleteDatabaseConfigVariable: Scalars['Boolean'];
   deleteFile: File;
+  deleteOneAgent: Agent;
   deleteOneField: Field;
   deleteOneObject: Object;
   deleteOneRole: Scalars['String'];
@@ -1108,8 +1332,15 @@ export type Mutation = {
   deleteTwoFactorAuthenticationMethod: DeleteTwoFactorAuthenticationMethodOutput;
   deleteUser: User;
   deleteWebhook: Scalars['Boolean'];
-  deleteWorkflowVersionStep: WorkflowAction;
+  deleteWorkflowVersionEdge: WorkflowVersionStepChanges;
+  deleteWorkflowVersionStep: WorkflowVersionStepChanges;
   deleteWorkspaceInvitation: Scalars['String'];
+  destroyCoreView: Scalars['Boolean'];
+  destroyCoreViewField: Scalars['Boolean'];
+  destroyCoreViewFilter: Scalars['Boolean'];
+  destroyCoreViewFilterGroup: Scalars['Boolean'];
+  destroyCoreViewGroup: Scalars['Boolean'];
+  destroyCoreViewSort: Scalars['Boolean'];
   disablePostgresProxy: PostgresCredentials;
   editSSOIdentityProvider: EditSsoOutput;
   emailPasswordResetLink: EmailPasswordResetLink;
@@ -1123,10 +1354,12 @@ export type Mutation = {
   getAuthorizationUrlForSSO: GetAuthorizationUrlForSsoOutput;
   getLoginTokenFromCredentials: LoginToken;
   getLoginTokenFromEmailVerificationToken: GetLoginTokenFromEmailVerificationTokenOutput;
+  getWorkspaceAgnosticTokenFromEmailVerificationToken: AvailableWorkspacesAndAccessTokensOutput;
   impersonate: ImpersonateOutput;
   initiateOTPProvisioning: InitiateTwoFactorAuthenticationProvisioningOutput;
   initiateOTPProvisioningForAuthenticatedUser: InitiateTwoFactorAuthenticationProvisioningOutput;
   publishServerlessFunction: ServerlessFunction;
+  removeAgentHandoff: Scalars['Boolean'];
   removeRoleFromAgent: Scalars['Boolean'];
   renewToken: AuthTokens;
   resendEmailVerificationToken: ResendEmailVerificationTokenOutput;
@@ -1146,6 +1379,12 @@ export type Mutation = {
   switchToYearlyInterval: BillingUpdateOutput;
   trackAnalytics: Analytics;
   updateApiKey?: Maybe<ApiKey>;
+  updateCoreView: CoreView;
+  updateCoreViewField: CoreViewField;
+  updateCoreViewFilter: CoreViewFilter;
+  updateCoreViewFilterGroup: CoreViewFilterGroup;
+  updateCoreViewGroup: CoreViewGroup;
+  updateCoreViewSort: CoreViewSort;
   updateDatabaseConfigVariable: Scalars['Boolean'];
   updateLabPublicFeatureFlag: FeatureFlagDto;
   updateOneAgent: Agent;
@@ -1156,6 +1395,7 @@ export type Mutation = {
   updatePasswordViaResetToken: InvalidatePassword;
   updateWebhook?: Maybe<Webhook>;
   updateWorkflowRunStep: WorkflowAction;
+  updateWorkflowVersionPositions: Scalars['Boolean'];
   updateWorkflowVersionStep: WorkflowAction;
   updateWorkspace: Workspace;
   updateWorkspaceFeatureFlag: Scalars['Boolean'];
@@ -1174,7 +1414,7 @@ export type Mutation = {
 
 
 export type MutationActivateWorkflowVersionArgs = {
-  workflowVersionId: Scalars['String'];
+  workflowVersionId: Scalars['UUID'];
 };
 
 
@@ -1185,6 +1425,12 @@ export type MutationActivateWorkspaceArgs = {
 
 export type MutationAssignRoleToAgentArgs = {
   agentId: Scalars['UUID'];
+  roleId: Scalars['UUID'];
+};
+
+
+export type MutationAssignRoleToApiKeyArgs = {
+  apiKeyId: Scalars['UUID'];
   roleId: Scalars['UUID'];
 };
 
@@ -1214,6 +1460,11 @@ export type MutationCreateAgentChatThreadArgs = {
 };
 
 
+export type MutationCreateAgentHandoffArgs = {
+  input: CreateAgentHandoffInput;
+};
+
+
 export type MutationCreateApiKeyArgs = {
   input: CreateApiKeyDto;
 };
@@ -1221,6 +1472,36 @@ export type MutationCreateApiKeyArgs = {
 
 export type MutationCreateApprovedAccessDomainArgs = {
   input: CreateApprovedAccessDomainInput;
+};
+
+
+export type MutationCreateCoreViewArgs = {
+  input: CreateViewInput;
+};
+
+
+export type MutationCreateCoreViewFieldArgs = {
+  input: CreateViewFieldInput;
+};
+
+
+export type MutationCreateCoreViewFilterArgs = {
+  input: CreateViewFilterInput;
+};
+
+
+export type MutationCreateCoreViewFilterGroupArgs = {
+  input: CreateViewFilterGroupInput;
+};
+
+
+export type MutationCreateCoreViewGroupArgs = {
+  input: CreateViewGroupInput;
+};
+
+
+export type MutationCreateCoreViewSortArgs = {
+  input: CreateViewSortInput;
 };
 
 
@@ -1247,9 +1528,14 @@ export type MutationCreateOidcIdentityProviderArgs = {
 
 export type MutationCreateObjectEventArgs = {
   event: Scalars['String'];
-  objectMetadataId: Scalars['String'];
+  objectMetadataId: Scalars['UUID'];
   properties?: InputMaybe<Scalars['JSON']>;
-  recordId: Scalars['String'];
+  recordId: Scalars['UUID'];
+};
+
+
+export type MutationCreateOneAgentArgs = {
+  input: CreateAgentInput;
 };
 
 
@@ -1278,18 +1564,53 @@ export type MutationCreateWebhookArgs = {
 };
 
 
+export type MutationCreateWorkflowVersionEdgeArgs = {
+  input: CreateWorkflowVersionEdgeInput;
+};
+
+
 export type MutationCreateWorkflowVersionStepArgs = {
   input: CreateWorkflowVersionStepInput;
 };
 
 
 export type MutationDeactivateWorkflowVersionArgs = {
-  workflowVersionId: Scalars['String'];
+  workflowVersionId: Scalars['UUID'];
 };
 
 
 export type MutationDeleteApprovedAccessDomainArgs = {
   input: DeleteApprovedAccessDomainInput;
+};
+
+
+export type MutationDeleteCoreViewArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDeleteCoreViewFieldArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDeleteCoreViewFilterArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDeleteCoreViewFilterGroupArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDeleteCoreViewGroupArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDeleteCoreViewSortArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -1299,7 +1620,12 @@ export type MutationDeleteDatabaseConfigVariableArgs = {
 
 
 export type MutationDeleteFileArgs = {
-  fileId: Scalars['String'];
+  fileId: Scalars['UUID'];
+};
+
+
+export type MutationDeleteOneAgentArgs = {
+  input: AgentIdInput;
 };
 
 
@@ -1314,7 +1640,7 @@ export type MutationDeleteOneObjectArgs = {
 
 
 export type MutationDeleteOneRoleArgs = {
-  roleId: Scalars['String'];
+  roleId: Scalars['UUID'];
 };
 
 
@@ -1338,6 +1664,11 @@ export type MutationDeleteWebhookArgs = {
 };
 
 
+export type MutationDeleteWorkflowVersionEdgeArgs = {
+  input: CreateWorkflowVersionEdgeInput;
+};
+
+
 export type MutationDeleteWorkflowVersionStepArgs = {
   input: DeleteWorkflowVersionStepInput;
 };
@@ -1348,6 +1679,36 @@ export type MutationDeleteWorkspaceInvitationArgs = {
 };
 
 
+export type MutationDestroyCoreViewArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDestroyCoreViewFieldArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDestroyCoreViewFilterArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDestroyCoreViewFilterGroupArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDestroyCoreViewGroupArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDestroyCoreViewSortArgs = {
+  id: Scalars['String'];
+};
+
+
 export type MutationEditSsoIdentityProviderArgs = {
   input: EditSsoInput;
 };
@@ -1355,7 +1716,7 @@ export type MutationEditSsoIdentityProviderArgs = {
 
 export type MutationEmailPasswordResetLinkArgs = {
   email: Scalars['String'];
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 
@@ -1365,7 +1726,7 @@ export type MutationExecuteOneServerlessFunctionArgs = {
 
 
 export type MutationGenerateApiKeyTokenArgs = {
-  apiKeyId: Scalars['String'];
+  apiKeyId: Scalars['UUID'];
   expiresAt: Scalars['String'];
 };
 
@@ -1392,8 +1753,10 @@ export type MutationGetAuthorizationUrlForSsoArgs = {
 export type MutationGetLoginTokenFromCredentialsArgs = {
   captchaToken?: InputMaybe<Scalars['String']>;
   email: Scalars['String'];
+  locale?: InputMaybe<Scalars['String']>;
   origin: Scalars['String'];
   password: Scalars['String'];
+  verifyEmailRedirectPath?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -1405,9 +1768,16 @@ export type MutationGetLoginTokenFromEmailVerificationTokenArgs = {
 };
 
 
+export type MutationGetWorkspaceAgnosticTokenFromEmailVerificationTokenArgs = {
+  captchaToken?: InputMaybe<Scalars['String']>;
+  email: Scalars['String'];
+  emailVerificationToken: Scalars['String'];
+};
+
+
 export type MutationImpersonateArgs = {
-  userId: Scalars['String'];
-  workspaceId: Scalars['String'];
+  userId: Scalars['UUID'];
+  workspaceId: Scalars['UUID'];
 };
 
 
@@ -1419,6 +1789,11 @@ export type MutationInitiateOtpProvisioningArgs = {
 
 export type MutationPublishServerlessFunctionArgs = {
   input: PublishServerlessFunctionInput;
+};
+
+
+export type MutationRemoveAgentHandoffArgs = {
+  input: RemoveAgentHandoffInput;
 };
 
 
@@ -1454,10 +1829,10 @@ export type MutationRunWorkflowVersionArgs = {
 
 
 export type MutationSaveImapSmtpCaldavAccountArgs = {
-  accountOwnerId: Scalars['String'];
+  accountOwnerId: Scalars['UUID'];
   connectionParameters: EmailAccountConnectionParameters;
   handle: Scalars['String'];
-  id?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['UUID']>;
 };
 
 
@@ -1469,14 +1844,18 @@ export type MutationSendInvitationsArgs = {
 export type MutationSignInArgs = {
   captchaToken?: InputMaybe<Scalars['String']>;
   email: Scalars['String'];
+  locale?: InputMaybe<Scalars['String']>;
   password: Scalars['String'];
+  verifyEmailRedirectPath?: InputMaybe<Scalars['String']>;
 };
 
 
 export type MutationSignUpArgs = {
   captchaToken?: InputMaybe<Scalars['String']>;
   email: Scalars['String'];
+  locale?: InputMaybe<Scalars['String']>;
   password: Scalars['String'];
+  verifyEmailRedirectPath?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -1485,8 +1864,8 @@ export type MutationSignUpInWorkspaceArgs = {
   email: Scalars['String'];
   locale?: InputMaybe<Scalars['String']>;
   password: Scalars['String'];
-  verifyEmailNextPath?: InputMaybe<Scalars['String']>;
-  workspaceId?: InputMaybe<Scalars['String']>;
+  verifyEmailRedirectPath?: InputMaybe<Scalars['String']>;
+  workspaceId?: InputMaybe<Scalars['UUID']>;
   workspaceInviteHash?: InputMaybe<Scalars['String']>;
   workspacePersonalInviteToken?: InputMaybe<Scalars['String']>;
 };
@@ -1507,6 +1886,42 @@ export type MutationTrackAnalyticsArgs = {
 
 export type MutationUpdateApiKeyArgs = {
   input: UpdateApiKeyDto;
+};
+
+
+export type MutationUpdateCoreViewArgs = {
+  id: Scalars['String'];
+  input: UpdateViewInput;
+};
+
+
+export type MutationUpdateCoreViewFieldArgs = {
+  id: Scalars['String'];
+  input: UpdateViewFieldInput;
+};
+
+
+export type MutationUpdateCoreViewFilterArgs = {
+  id: Scalars['String'];
+  input: UpdateViewFilterInput;
+};
+
+
+export type MutationUpdateCoreViewFilterGroupArgs = {
+  id: Scalars['String'];
+  input: UpdateViewFilterGroupInput;
+};
+
+
+export type MutationUpdateCoreViewGroupArgs = {
+  id: Scalars['String'];
+  input: UpdateViewGroupInput;
+};
+
+
+export type MutationUpdateCoreViewSortArgs = {
+  id: Scalars['String'];
+  input: UpdateViewSortInput;
 };
 
 
@@ -1562,6 +1977,11 @@ export type MutationUpdateWorkflowRunStepArgs = {
 };
 
 
+export type MutationUpdateWorkflowVersionPositionsArgs = {
+  input: UpdateWorkflowVersionPositionsInput;
+};
+
+
 export type MutationUpdateWorkflowVersionStepArgs = {
   input: UpdateWorkflowVersionStepInput;
 };
@@ -1575,13 +1995,13 @@ export type MutationUpdateWorkspaceArgs = {
 export type MutationUpdateWorkspaceFeatureFlagArgs = {
   featureFlag: Scalars['String'];
   value: Scalars['Boolean'];
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 
 export type MutationUpdateWorkspaceMemberRoleArgs = {
-  roleId: Scalars['String'];
-  workspaceMemberId: Scalars['String'];
+  roleId: Scalars['UUID'];
+  workspaceMemberId: Scalars['UUID'];
 };
 
 
@@ -1639,14 +2059,13 @@ export type MutationVerifyTwoFactorAuthenticationMethodForAuthenticatedUserArgs 
 export type Object = {
   __typename?: 'Object';
   createdAt: Scalars['DateTime'];
-  dataSourceId: Scalars['String'];
   description?: Maybe<Scalars['String']>;
   duplicateCriteria?: Maybe<Array<Array<Scalars['String']>>>;
   fields: ObjectFieldsConnection;
   fieldsList: Array<Field>;
   icon?: Maybe<Scalars['String']>;
   id: Scalars['UUID'];
-  imageIdentifierFieldMetadataId?: Maybe<Scalars['String']>;
+  imageIdentifierFieldMetadataId?: Maybe<Scalars['UUID']>;
   indexMetadataList: Array<Index>;
   indexMetadatas: ObjectIndexMetadatasConnection;
   isActive: Scalars['Boolean'];
@@ -1655,7 +2074,8 @@ export type Object = {
   isRemote: Scalars['Boolean'];
   isSearchable: Scalars['Boolean'];
   isSystem: Scalars['Boolean'];
-  labelIdentifierFieldMetadataId?: Maybe<Scalars['String']>;
+  isUIReadOnly: Scalars['Boolean'];
+  labelIdentifierFieldMetadataId?: Maybe<Scalars['UUID']>;
   labelPlural: Scalars['String'];
   labelSingular: Scalars['String'];
   namePlural: Scalars['String'];
@@ -1709,6 +2129,7 @@ export type ObjectFilter = {
   isRemote?: InputMaybe<BooleanFieldComparison>;
   isSearchable?: InputMaybe<BooleanFieldComparison>;
   isSystem?: InputMaybe<BooleanFieldComparison>;
+  isUIReadOnly?: InputMaybe<BooleanFieldComparison>;
   or?: InputMaybe<Array<ObjectFilter>>;
 };
 
@@ -1726,7 +2147,7 @@ export type ObjectPermission = {
   canReadObjectRecords?: Maybe<Scalars['Boolean']>;
   canSoftDeleteObjectRecords?: Maybe<Scalars['Boolean']>;
   canUpdateObjectRecords?: Maybe<Scalars['Boolean']>;
-  objectMetadataId: Scalars['String'];
+  objectMetadataId: Scalars['UUID'];
   restrictedFields?: Maybe<Scalars['JSON']>;
 };
 
@@ -1735,7 +2156,7 @@ export type ObjectPermissionInput = {
   canReadObjectRecords?: InputMaybe<Scalars['Boolean']>;
   canSoftDeleteObjectRecords?: InputMaybe<Scalars['Boolean']>;
   canUpdateObjectRecords?: InputMaybe<Scalars['Boolean']>;
-  objectMetadataId: Scalars['String'];
+  objectMetadataId: Scalars['UUID'];
 };
 
 export type ObjectRecordFilterInput = {
@@ -1769,7 +2190,7 @@ export type OnDbEventDto = {
 export type OnDbEventInput = {
   action?: InputMaybe<DatabaseEventAction>;
   objectNameSingular?: InputMaybe<Scalars['String']>;
-  recordId?: InputMaybe<Scalars['String']>;
+  recordId?: InputMaybe<Scalars['UUID']>;
 };
 
 /** Onboarding status */
@@ -1804,8 +2225,8 @@ export type PageInfo = {
 export type PermissionFlag = {
   __typename?: 'PermissionFlag';
   flag: PermissionFlagType;
-  id: Scalars['String'];
-  roleId: Scalars['String'];
+  id: Scalars['UUID'];
+  roleId: Scalars['UUID'];
 };
 
 export enum PermissionFlagType {
@@ -1843,7 +2264,7 @@ export type PostgresCredentials = {
   id: Scalars['UUID'];
   password: Scalars['String'];
   user: Scalars['String'];
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type PublicFeatureFlag = {
@@ -1863,7 +2284,7 @@ export type PublicWorkspaceDataOutput = {
   __typename?: 'PublicWorkspaceDataOutput';
   authProviders: AuthProviders;
   displayName?: Maybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   logo?: Maybe<Scalars['String']>;
   workspaceUrls: WorkspaceUrls;
 };
@@ -1887,6 +2308,9 @@ export type Query = {
   currentWorkspace: Workspace;
   field: Field;
   fields: FieldConnection;
+  findAgentHandoffTargets: Array<Agent>;
+  findAgentHandoffs: Array<AgentHandoffDto>;
+  findManyAgents: Array<Agent>;
   findManyServerlessFunctions: Array<ServerlessFunction>;
   findOneAgent: Agent;
   findOneServerlessFunction: ServerlessFunction;
@@ -1898,6 +2322,18 @@ export type Query = {
   getAvailablePackages: Scalars['JSON'];
   getConfigVariablesGrouped: ConfigVariablesOutput;
   getConnectedImapSmtpCaldavAccount: ConnectedImapSmtpCaldavAccount;
+  getCoreView?: Maybe<CoreView>;
+  getCoreViewField?: Maybe<CoreViewField>;
+  getCoreViewFields: Array<CoreViewField>;
+  getCoreViewFilter?: Maybe<CoreViewFilter>;
+  getCoreViewFilterGroup?: Maybe<CoreViewFilterGroup>;
+  getCoreViewFilterGroups: Array<CoreViewFilterGroup>;
+  getCoreViewFilters: Array<CoreViewFilter>;
+  getCoreViewGroup?: Maybe<CoreViewGroup>;
+  getCoreViewGroups: Array<CoreViewGroup>;
+  getCoreViewSort?: Maybe<CoreViewSort>;
+  getCoreViewSorts: Array<CoreViewSort>;
+  getCoreViews: Array<CoreView>;
   getDatabaseConfigVariable: ConfigVariable;
   getIndicatorHealthStatus: AdminPanelHealthServiceData;
   getMeteredProductsUsage: Array<BillingMeteredProductUsageOutput>;
@@ -1909,8 +2345,10 @@ export type Query = {
   getServerlessFunctionSourceCode?: Maybe<Scalars['JSON']>;
   getSystemHealthStatus: SystemHealth;
   getTimelineCalendarEventsFromCompanyId: TimelineCalendarEventsWithTotal;
+  getTimelineCalendarEventsFromOpportunityId: TimelineCalendarEventsWithTotal;
   getTimelineCalendarEventsFromPersonId: TimelineCalendarEventsWithTotal;
   getTimelineThreadsFromCompanyId: TimelineThreadsWithTotal;
+  getTimelineThreadsFromOpportunityId: TimelineThreadsWithTotal;
   getTimelineThreadsFromPersonId: TimelineThreadsWithTotal;
   index: Index;
   indexMetadatas: IndexConnection;
@@ -1926,17 +2364,17 @@ export type Query = {
 
 
 export type QueryAgentChatMessagesArgs = {
-  threadId: Scalars['String'];
+  threadId: Scalars['UUID'];
 };
 
 
 export type QueryAgentChatThreadArgs = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 
 export type QueryAgentChatThreadsArgs = {
-  agentId: Scalars['String'];
+  agentId: Scalars['UUID'];
 };
 
 
@@ -1958,6 +2396,16 @@ export type QueryCheckUserExistsArgs = {
 
 export type QueryCheckWorkspaceInviteHashIsValidArgs = {
   inviteHash: Scalars['String'];
+};
+
+
+export type QueryFindAgentHandoffTargetsArgs = {
+  input: AgentIdInput;
+};
+
+
+export type QueryFindAgentHandoffsArgs = {
+  input: AgentIdInput;
 };
 
 
@@ -1996,7 +2444,67 @@ export type QueryGetAvailablePackagesArgs = {
 
 
 export type QueryGetConnectedImapSmtpCaldavAccountArgs = {
+  id: Scalars['UUID'];
+};
+
+
+export type QueryGetCoreViewArgs = {
   id: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewFieldArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewFieldsArgs = {
+  viewId: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewFilterArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewFilterGroupArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewFilterGroupsArgs = {
+  viewId?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryGetCoreViewFiltersArgs = {
+  viewId?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryGetCoreViewGroupArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewGroupsArgs = {
+  viewId?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryGetCoreViewSortArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryGetCoreViewSortsArgs = {
+  viewId?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryGetCoreViewsArgs = {
+  objectMetadataId?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -2033,6 +2541,13 @@ export type QueryGetTimelineCalendarEventsFromCompanyIdArgs = {
 };
 
 
+export type QueryGetTimelineCalendarEventsFromOpportunityIdArgs = {
+  opportunityId: Scalars['UUID'];
+  page: Scalars['Int'];
+  pageSize: Scalars['Int'];
+};
+
+
 export type QueryGetTimelineCalendarEventsFromPersonIdArgs = {
   page: Scalars['Int'];
   pageSize: Scalars['Int'];
@@ -2042,6 +2557,13 @@ export type QueryGetTimelineCalendarEventsFromPersonIdArgs = {
 
 export type QueryGetTimelineThreadsFromCompanyIdArgs = {
   companyId: Scalars['UUID'];
+  page: Scalars['Int'];
+  pageSize: Scalars['Int'];
+};
+
+
+export type QueryGetTimelineThreadsFromOpportunityIdArgs = {
+  opportunityId: Scalars['UUID'];
   page: Scalars['Int'];
   pageSize: Scalars['Int'];
 };
@@ -2091,7 +2613,7 @@ export type QueueMetricsDataPoint = {
 export type QueueMetricsSeries = {
   __typename?: 'QueueMetricsSeries';
   data: Array<QueueMetricsDataPoint>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export enum QueueMetricsTimeRange {
@@ -2120,10 +2642,10 @@ export enum RelationType {
 export type RemoteServer = {
   __typename?: 'RemoteServer';
   createdAt: Scalars['DateTime'];
-  foreignDataWrapperId: Scalars['ID'];
+  foreignDataWrapperId: Scalars['UUID'];
   foreignDataWrapperOptions?: Maybe<Scalars['JSON']>;
   foreignDataWrapperType: Scalars['String'];
-  id: Scalars['ID'];
+  id: Scalars['UUID'];
   label: Scalars['String'];
   schema?: Maybe<Scalars['String']>;
   updatedAt: Scalars['DateTime'];
@@ -2145,13 +2667,18 @@ export enum RemoteTableStatus {
   SYNCED = 'SYNCED'
 }
 
+export type RemoveAgentHandoffInput = {
+  fromAgentId: Scalars['UUID'];
+  toAgentId: Scalars['UUID'];
+};
+
 export type ResendEmailVerificationTokenOutput = {
   __typename?: 'ResendEmailVerificationTokenOutput';
   success: Scalars['Boolean'];
 };
 
 export type RevokeApiKeyDto = {
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export type Role = {
@@ -2163,12 +2690,14 @@ export type Role = {
   canUpdateAllObjectRecords: Scalars['Boolean'];
   canUpdateAllSettings: Scalars['Boolean'];
   description?: Maybe<Scalars['String']>;
+  fieldPermissions?: Maybe<Array<FieldPermission>>;
   icon?: Maybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   isEditable: Scalars['Boolean'];
   label: Scalars['String'];
   objectPermissions?: Maybe<Array<ObjectPermission>>;
   permissionFlags?: Maybe<Array<PermissionFlag>>;
+  standardId?: Maybe<Scalars['UUID']>;
   workspaceMembers: Array<WorkspaceMember>;
 };
 
@@ -2176,14 +2705,14 @@ export type RunWorkflowVersionInput = {
   /** Execution result in JSON format */
   payload?: InputMaybe<Scalars['JSON']>;
   /** Workflow run ID */
-  workflowRunId?: InputMaybe<Scalars['String']>;
+  workflowRunId?: InputMaybe<Scalars['UUID']>;
   /** Workflow version ID */
-  workflowVersionId: Scalars['String'];
+  workflowVersionId: Scalars['UUID'];
 };
 
 export type SsoConnection = {
   __typename?: 'SSOConnection';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   issuer: Scalars['String'];
   name: Scalars['String'];
   status: SsoIdentityProviderStatus;
@@ -2192,7 +2721,7 @@ export type SsoConnection = {
 
 export type SsoIdentityProvider = {
   __typename?: 'SSOIdentityProvider';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   issuer: Scalars['String'];
   name: Scalars['String'];
   status: SsoIdentityProviderStatus;
@@ -2210,7 +2739,7 @@ export type SearchRecord = {
   imageUrl?: Maybe<Scalars['String']>;
   label: Scalars['String'];
   objectNameSingular: Scalars['String'];
-  recordId: Scalars['String'];
+  recordId: Scalars['UUID'];
   tsRank: Scalars['Float'];
   tsRankCD: Scalars['Float'];
 };
@@ -2298,7 +2827,7 @@ export type SetupOidcSsoInput = {
 export type SetupSamlSsoInput = {
   certificate: Scalars['String'];
   fingerprint?: InputMaybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   issuer: Scalars['String'];
   name: Scalars['String'];
   ssoURL: Scalars['String'];
@@ -2306,7 +2835,7 @@ export type SetupSamlSsoInput = {
 
 export type SetupSsoOutput = {
   __typename?: 'SetupSsoOutput';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   issuer: Scalars['String'];
   name: Scalars['String'];
   status: SsoIdentityProviderStatus;
@@ -2336,10 +2865,10 @@ export type StandardOverrides = {
 export type SubmitFormStepInput = {
   /** Form response in JSON format */
   response: Scalars['JSON'];
-  /** Workflow version ID */
-  stepId: Scalars['String'];
+  /** Workflow step ID */
+  stepId: Scalars['UUID'];
   /** Workflow run ID */
-  workflowRunId: Scalars['String'];
+  workflowRunId: Scalars['UUID'];
 };
 
 export type Subscription = {
@@ -2499,16 +3028,19 @@ export type UuidFilterComparison = {
 
 export type UpdateAgentInput = {
   description?: InputMaybe<Scalars['String']>;
+  icon?: InputMaybe<Scalars['String']>;
   id: Scalars['UUID'];
+  label: Scalars['String'];
   modelId: Scalars['String'];
   name: Scalars['String'];
   prompt: Scalars['String'];
   responseFormat?: InputMaybe<Scalars['JSON']>;
+  roleId?: InputMaybe<Scalars['UUID']>;
 };
 
 export type UpdateApiKeyDto = {
   expiresAt?: InputMaybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   name?: InputMaybe<Scalars['String']>;
   revokedAt?: InputMaybe<Scalars['String']>;
 };
@@ -2521,6 +3053,7 @@ export type UpdateFieldInput = {
   isLabelSyncedWithName?: InputMaybe<Scalars['Boolean']>;
   isNullable?: InputMaybe<Scalars['Boolean']>;
   isSystem?: InputMaybe<Scalars['Boolean']>;
+  isUIReadOnly?: InputMaybe<Scalars['Boolean']>;
   isUnique?: InputMaybe<Scalars['Boolean']>;
   label?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
@@ -2536,10 +3069,10 @@ export type UpdateLabPublicFeatureFlagInput = {
 export type UpdateObjectPayload = {
   description?: InputMaybe<Scalars['String']>;
   icon?: InputMaybe<Scalars['String']>;
-  imageIdentifierFieldMetadataId?: InputMaybe<Scalars['String']>;
+  imageIdentifierFieldMetadataId?: InputMaybe<Scalars['UUID']>;
   isActive?: InputMaybe<Scalars['Boolean']>;
   isLabelSyncedWithName?: InputMaybe<Scalars['Boolean']>;
-  labelIdentifierFieldMetadataId?: InputMaybe<Scalars['String']>;
+  labelIdentifierFieldMetadataId?: InputMaybe<Scalars['UUID']>;
   labelPlural?: InputMaybe<Scalars['String']>;
   labelSingular?: InputMaybe<Scalars['String']>;
   namePlural?: InputMaybe<Scalars['String']>;
@@ -2587,9 +3120,61 @@ export type UpdateServerlessFunctionInput = {
   timeoutSeconds?: InputMaybe<Scalars['Float']>;
 };
 
+export type UpdateViewFieldInput = {
+  aggregateOperation?: InputMaybe<AggregateOperations>;
+  isVisible?: InputMaybe<Scalars['Boolean']>;
+  position?: InputMaybe<Scalars['Float']>;
+  size?: InputMaybe<Scalars['Float']>;
+};
+
+export type UpdateViewFilterGroupInput = {
+  logicalOperator?: InputMaybe<ViewFilterGroupLogicalOperator>;
+  parentViewFilterGroupId?: InputMaybe<Scalars['UUID']>;
+  positionInViewFilterGroup?: InputMaybe<Scalars['Float']>;
+  viewId?: InputMaybe<Scalars['UUID']>;
+};
+
+export type UpdateViewFilterInput = {
+  fieldMetadataId?: InputMaybe<Scalars['UUID']>;
+  operand?: InputMaybe<ViewFilterOperand>;
+  positionInViewFilterGroup?: InputMaybe<Scalars['Float']>;
+  subFieldName?: InputMaybe<Scalars['String']>;
+  value?: InputMaybe<Scalars['JSON']>;
+  viewFilterGroupId?: InputMaybe<Scalars['UUID']>;
+  viewId?: InputMaybe<Scalars['UUID']>;
+};
+
+export type UpdateViewGroupInput = {
+  fieldMetadataId?: InputMaybe<Scalars['UUID']>;
+  fieldValue?: InputMaybe<Scalars['String']>;
+  isVisible?: InputMaybe<Scalars['Boolean']>;
+  position?: InputMaybe<Scalars['Float']>;
+  viewId?: InputMaybe<Scalars['UUID']>;
+};
+
+export type UpdateViewInput = {
+  anyFieldFilterValue?: InputMaybe<Scalars['String']>;
+  icon?: InputMaybe<Scalars['String']>;
+  isCompact?: InputMaybe<Scalars['Boolean']>;
+  kanbanAggregateOperation?: InputMaybe<AggregateOperations>;
+  kanbanAggregateOperationFieldMetadataId?: InputMaybe<Scalars['UUID']>;
+  key?: InputMaybe<ViewKey>;
+  name?: InputMaybe<Scalars['String']>;
+  objectMetadataId?: InputMaybe<Scalars['UUID']>;
+  openRecordIn?: InputMaybe<ViewOpenRecordIn>;
+  position?: InputMaybe<Scalars['Float']>;
+  type?: InputMaybe<ViewType>;
+};
+
+export type UpdateViewSortInput = {
+  direction?: InputMaybe<ViewSortDirection>;
+  fieldMetadataId?: InputMaybe<Scalars['UUID']>;
+  viewId?: InputMaybe<Scalars['UUID']>;
+};
+
 export type UpdateWebhookDto = {
   description?: InputMaybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   operations?: InputMaybe<Array<Scalars['String']>>;
   secret?: InputMaybe<Scalars['String']>;
   targetUrl?: InputMaybe<Scalars['String']>;
@@ -2599,20 +3184,27 @@ export type UpdateWorkflowRunStepInput = {
   /** Step to update in JSON format */
   step: Scalars['JSON'];
   /** Workflow run ID */
-  workflowRunId: Scalars['String'];
+  workflowRunId: Scalars['UUID'];
+};
+
+export type UpdateWorkflowVersionPositionsInput = {
+  /** Workflow version updated positions */
+  positions: Array<WorkflowStepPositionUpdateInput>;
+  /** Workflow version ID */
+  workflowVersionId: Scalars['UUID'];
 };
 
 export type UpdateWorkflowVersionStepInput = {
   /** Step to update in JSON format */
   step: Scalars['JSON'];
   /** Workflow version ID */
-  workflowVersionId: Scalars['String'];
+  workflowVersionId: Scalars['UUID'];
 };
 
 export type UpdateWorkspaceInput = {
   allowImpersonation?: InputMaybe<Scalars['Boolean']>;
   customDomain?: InputMaybe<Scalars['String']>;
-  defaultRoleId?: InputMaybe<Scalars['String']>;
+  defaultRoleId?: InputMaybe<Scalars['UUID']>;
   displayName?: InputMaybe<Scalars['String']>;
   inviteHash?: InputMaybe<Scalars['String']>;
   isGoogleAuthEnabled?: InputMaybe<Scalars['Boolean']>;
@@ -2626,17 +3218,17 @@ export type UpdateWorkspaceInput = {
 
 export type UpsertFieldPermissionsInput = {
   fieldPermissions: Array<FieldPermissionInput>;
-  roleId: Scalars['String'];
+  roleId: Scalars['UUID'];
 };
 
 export type UpsertObjectPermissionsInput = {
   objectPermissions: Array<ObjectPermissionInput>;
-  roleId: Scalars['String'];
+  roleId: Scalars['UUID'];
 };
 
 export type UpsertPermissionFlagsInput = {
   permissionFlagKeys: Array<PermissionFlagType>;
-  roleId: Scalars['String'];
+  roleId: Scalars['UUID'];
 };
 
 export type User = {
@@ -2680,7 +3272,7 @@ export type UserInfo = {
   __typename?: 'UserInfo';
   email: Scalars['String'];
   firstName?: Maybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   lastName?: Maybe<Scalars['String']>;
 };
 
@@ -2708,20 +3300,20 @@ export type UserWorkspace = {
   twoFactorAuthenticationMethodSummary?: Maybe<Array<TwoFactorAuthenticationMethodDto>>;
   updatedAt: Scalars['DateTime'];
   user: User;
-  userId: Scalars['String'];
+  userId: Scalars['UUID'];
   workspace?: Maybe<Workspace>;
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type ValidateApprovedAccessDomainInput = {
-  approvedAccessDomainId: Scalars['String'];
+  approvedAccessDomainId: Scalars['UUID'];
   validationToken: Scalars['String'];
 };
 
 export type ValidatePasswordResetToken = {
   __typename?: 'ValidatePasswordResetToken';
   email: Scalars['String'];
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export type VerifyTwoFactorAuthenticationMethodOutput = {
@@ -2735,6 +3327,50 @@ export type VersionInfo = {
   latestVersion: Scalars['String'];
 };
 
+export enum ViewFilterGroupLogicalOperator {
+  AND = 'AND',
+  NOT = 'NOT',
+  OR = 'OR'
+}
+
+export enum ViewFilterOperand {
+  CONTAINS = 'CONTAINS',
+  DOES_NOT_CONTAIN = 'DOES_NOT_CONTAIN',
+  GREATER_THAN_OR_EQUAL = 'GREATER_THAN_OR_EQUAL',
+  IS = 'IS',
+  IS_AFTER = 'IS_AFTER',
+  IS_BEFORE = 'IS_BEFORE',
+  IS_EMPTY = 'IS_EMPTY',
+  IS_IN_FUTURE = 'IS_IN_FUTURE',
+  IS_IN_PAST = 'IS_IN_PAST',
+  IS_NOT = 'IS_NOT',
+  IS_NOT_EMPTY = 'IS_NOT_EMPTY',
+  IS_NOT_NULL = 'IS_NOT_NULL',
+  IS_RELATIVE = 'IS_RELATIVE',
+  IS_TODAY = 'IS_TODAY',
+  LESS_THAN_OR_EQUAL = 'LESS_THAN_OR_EQUAL',
+  VECTOR_SEARCH = 'VECTOR_SEARCH'
+}
+
+export enum ViewKey {
+  INDEX = 'INDEX'
+}
+
+export enum ViewOpenRecordIn {
+  RECORD_PAGE = 'RECORD_PAGE',
+  SIDE_PANEL = 'SIDE_PANEL'
+}
+
+export enum ViewSortDirection {
+  ASC = 'ASC',
+  DESC = 'DESC'
+}
+
+export enum ViewType {
+  KANBAN = 'KANBAN',
+  TABLE = 'TABLE'
+}
+
 export type Webhook = {
   __typename?: 'Webhook';
   createdAt: Scalars['DateTime'];
@@ -2746,7 +3382,7 @@ export type Webhook = {
   targetUrl: Scalars['String'];
   updatedAt: Scalars['DateTime'];
   workspace: Workspace;
-  workspaceId: Scalars['String'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type WorkerQueueMetrics = {
@@ -2766,6 +3402,7 @@ export type WorkflowAction = {
   id: Scalars['UUID'];
   name: Scalars['String'];
   nextStepIds?: Maybe<Array<Scalars['UUID']>>;
+  position?: Maybe<WorkflowStepPosition>;
   settings: Scalars['JSON'];
   type: Scalars['String'];
   valid: Scalars['Boolean'];
@@ -2776,9 +3413,35 @@ export type WorkflowRun = {
   workflowRunId: Scalars['UUID'];
 };
 
+export type WorkflowStepPosition = {
+  __typename?: 'WorkflowStepPosition';
+  x: Scalars['Float'];
+  y: Scalars['Float'];
+};
+
+export type WorkflowStepPositionInput = {
+  x: Scalars['Float'];
+  y: Scalars['Float'];
+};
+
+export type WorkflowStepPositionUpdateInput = {
+  /** Step or trigger ID */
+  id: Scalars['String'];
+  /** Position of the step or trigger */
+  position: WorkflowStepPositionInput;
+};
+
 export type WorkflowVersion = {
   __typename?: 'WorkflowVersion';
   id: Scalars['UUID'];
+};
+
+export type WorkflowVersionStepChanges = {
+  __typename?: 'WorkflowVersionStepChanges';
+  createdStep?: Maybe<WorkflowAction>;
+  deletedStepIds?: Maybe<Array<Scalars['String']>>;
+  stepsNextStepIds?: Maybe<Scalars['JSON']>;
+  triggerNextStepIds?: Maybe<Array<Scalars['String']>>;
 };
 
 export type Workspace = {
@@ -2810,6 +3473,12 @@ export type Workspace = {
   subdomain: Scalars['String'];
   updatedAt: Scalars['DateTime'];
   version?: Maybe<Scalars['String']>;
+  viewFields?: Maybe<Array<CoreViewField>>;
+  viewFilterGroups?: Maybe<Array<CoreViewFilterGroup>>;
+  viewFilters?: Maybe<Array<CoreViewFilter>>;
+  viewGroups?: Maybe<Array<CoreViewGroup>>;
+  viewSorts?: Maybe<Array<CoreViewSort>>;
+  views?: Maybe<Array<CoreView>>;
   workspaceMembersCount?: Maybe<Scalars['Float']>;
   workspaceUrls: WorkspaceUrls;
 };
@@ -2834,7 +3503,7 @@ export type WorkspaceInfo = {
   __typename?: 'WorkspaceInfo';
   allowImpersonation: Scalars['Boolean'];
   featureFlags: Array<FeatureFlag>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   logo?: Maybe<Scalars['String']>;
   name: Scalars['String'];
   totalUsers: Scalars['Float'];
@@ -2866,7 +3535,7 @@ export type WorkspaceMember = {
   timeFormat?: Maybe<WorkspaceMemberTimeFormatEnum>;
   timeZone?: Maybe<Scalars['String']>;
   userEmail: Scalars['String'];
-  userWorkspaceId?: Maybe<Scalars['String']>;
+  userWorkspaceId?: Maybe<Scalars['UUID']>;
 };
 
 /** Date format as Month first, Day first, Year first or system as default */
@@ -2887,7 +3556,7 @@ export enum WorkspaceMemberTimeFormatEnum {
 export type WorkspaceNameAndId = {
   __typename?: 'WorkspaceNameAndId';
   displayName?: Maybe<Scalars['String']>;
-  id: Scalars['String'];
+  id: Scalars['UUID'];
 };
 
 export type WorkspaceUrls = {
@@ -2898,7 +3567,7 @@ export type WorkspaceUrls = {
 
 export type WorkspaceUrlsAndId = {
   __typename?: 'WorkspaceUrlsAndId';
-  id: Scalars['String'];
+  id: Scalars['UUID'];
   workspaceUrls: WorkspaceUrls;
 };
 
@@ -2912,7 +3581,7 @@ export type SearchQueryVariables = Exact<{
 }>;
 
 
-export type SearchQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultConnection', edges: Array<{ __typename?: 'SearchResultEdge', cursor: string, node: { __typename?: 'SearchRecord', recordId: string, objectNameSingular: string, label: string, imageUrl?: string | null, tsRankCD: number, tsRank: number } }>, pageInfo: { __typename?: 'SearchResultPageInfo', hasNextPage: boolean, endCursor?: string | null } } };
+export type SearchQuery = { __typename?: 'Query', search: { __typename?: 'SearchResultConnection', edges: Array<{ __typename?: 'SearchResultEdge', cursor: string, node: { __typename?: 'SearchRecord', recordId: any, objectNameSingular: string, label: string, imageUrl?: string | null, tsRankCD: number, tsRank: number } }>, pageInfo: { __typename?: 'SearchResultPageInfo', hasNextPage: boolean, endCursor?: string | null } } };
 
 export type OnDbEventSubscriptionVariables = Exact<{
   input: OnDbEventInput;
@@ -2921,7 +3590,354 @@ export type OnDbEventSubscriptionVariables = Exact<{
 
 export type OnDbEventSubscription = { __typename?: 'Subscription', onDbEvent: { __typename?: 'OnDbEventDTO', eventDate: string, action: DatabaseEventAction, objectNameSingular: string, updatedFields?: Array<string> | null, record: any } };
 
+export type ViewFieldFragmentFragment = { __typename?: 'CoreViewField', id: any, fieldMetadataId: any, viewId: any, isVisible: boolean, position: number, size: number, aggregateOperation?: AggregateOperations | null, createdAt: string, updatedAt: string };
 
+export type ViewFilterFragmentFragment = { __typename?: 'CoreViewFilter', id: any, fieldMetadataId: any, operand: ViewFilterOperand, value: any, viewFilterGroupId?: any | null, positionInViewFilterGroup?: number | null, subFieldName?: string | null, viewId: any, createdAt: string, updatedAt: string };
+
+export type ViewFilterGroupFragmentFragment = { __typename?: 'CoreViewFilterGroup', id: any, parentViewFilterGroupId?: any | null, logicalOperator: ViewFilterGroupLogicalOperator, positionInViewFilterGroup?: number | null, viewId: any, createdAt: string, updatedAt: string };
+
+export type ViewFragmentFragment = { __typename?: 'CoreView', id: any, name: string, objectMetadataId: any, type: ViewType, key?: ViewKey | null, icon: string, position: number, isCompact: boolean, openRecordIn: ViewOpenRecordIn, kanbanAggregateOperation?: AggregateOperations | null, kanbanAggregateOperationFieldMetadataId?: any | null, createdAt: string, updatedAt: string, anyFieldFilterValue?: string | null };
+
+export type ViewGroupFragmentFragment = { __typename?: 'CoreViewGroup', id: any, fieldMetadataId: any, isVisible: boolean, fieldValue: string, position: number, viewId: any, createdAt: string, updatedAt: string };
+
+export type ViewSortFragmentFragment = { __typename?: 'CoreViewSort', id: any, fieldMetadataId: any, direction: ViewSortDirection, viewId: any, createdAt: string, updatedAt: string };
+
+export type CreateCoreViewMutationVariables = Exact<{
+  input: CreateViewInput;
+}>;
+
+
+export type CreateCoreViewMutation = { __typename?: 'Mutation', createCoreView: { __typename?: 'CoreView', id: any, name: string, objectMetadataId: any, type: ViewType, key?: ViewKey | null, icon: string, position: number, isCompact: boolean, openRecordIn: ViewOpenRecordIn, kanbanAggregateOperation?: AggregateOperations | null, kanbanAggregateOperationFieldMetadataId?: any | null, createdAt: string, updatedAt: string, anyFieldFilterValue?: string | null } };
+
+export type CreateCoreViewFieldMutationVariables = Exact<{
+  input: CreateViewFieldInput;
+}>;
+
+
+export type CreateCoreViewFieldMutation = { __typename?: 'Mutation', createCoreViewField: { __typename?: 'CoreViewField', id: any, fieldMetadataId: any, viewId: any, isVisible: boolean, position: number, size: number, aggregateOperation?: AggregateOperations | null, createdAt: string, updatedAt: string } };
+
+export type CreateCoreViewFilterMutationVariables = Exact<{
+  input: CreateViewFilterInput;
+}>;
+
+
+export type CreateCoreViewFilterMutation = { __typename?: 'Mutation', createCoreViewFilter: { __typename?: 'CoreViewFilter', id: any, fieldMetadataId: any, operand: ViewFilterOperand, value: any, viewFilterGroupId?: any | null, positionInViewFilterGroup?: number | null, subFieldName?: string | null, viewId: any, createdAt: string, updatedAt: string } };
+
+export type CreateCoreViewFilterGroupMutationVariables = Exact<{
+  input: CreateViewFilterGroupInput;
+}>;
+
+
+export type CreateCoreViewFilterGroupMutation = { __typename?: 'Mutation', createCoreViewFilterGroup: { __typename?: 'CoreViewFilterGroup', id: any, parentViewFilterGroupId?: any | null, logicalOperator: ViewFilterGroupLogicalOperator, positionInViewFilterGroup?: number | null, viewId: any, createdAt: string, updatedAt: string } };
+
+export type CreateCoreViewGroupMutationVariables = Exact<{
+  input: CreateViewGroupInput;
+}>;
+
+
+export type CreateCoreViewGroupMutation = { __typename?: 'Mutation', createCoreViewGroup: { __typename?: 'CoreViewGroup', id: any, fieldMetadataId: any, isVisible: boolean, fieldValue: string, position: number, viewId: any, createdAt: string, updatedAt: string } };
+
+export type CreateCoreViewSortMutationVariables = Exact<{
+  input: CreateViewSortInput;
+}>;
+
+
+export type CreateCoreViewSortMutation = { __typename?: 'Mutation', createCoreViewSort: { __typename?: 'CoreViewSort', id: any, fieldMetadataId: any, direction: ViewSortDirection, viewId: any, createdAt: string, updatedAt: string } };
+
+export type DeleteCoreViewMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteCoreViewMutation = { __typename?: 'Mutation', deleteCoreView: boolean };
+
+export type DeleteCoreViewFieldMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteCoreViewFieldMutation = { __typename?: 'Mutation', deleteCoreViewField: boolean };
+
+export type DeleteCoreViewFilterMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteCoreViewFilterMutation = { __typename?: 'Mutation', deleteCoreViewFilter: boolean };
+
+export type DeleteCoreViewFilterGroupMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteCoreViewFilterGroupMutation = { __typename?: 'Mutation', deleteCoreViewFilterGroup: boolean };
+
+export type DeleteCoreViewGroupMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteCoreViewGroupMutation = { __typename?: 'Mutation', deleteCoreViewGroup: boolean };
+
+export type DeleteCoreViewSortMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteCoreViewSortMutation = { __typename?: 'Mutation', deleteCoreViewSort: boolean };
+
+export type DestroyCoreViewMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DestroyCoreViewMutation = { __typename?: 'Mutation', destroyCoreView: boolean };
+
+export type DestroyCoreViewFieldMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DestroyCoreViewFieldMutation = { __typename?: 'Mutation', destroyCoreViewField: boolean };
+
+export type DestroyCoreViewFilterMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DestroyCoreViewFilterMutation = { __typename?: 'Mutation', destroyCoreViewFilter: boolean };
+
+export type DestroyCoreViewFilterGroupMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DestroyCoreViewFilterGroupMutation = { __typename?: 'Mutation', destroyCoreViewFilterGroup: boolean };
+
+export type DestroyCoreViewGroupMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DestroyCoreViewGroupMutation = { __typename?: 'Mutation', destroyCoreViewGroup: boolean };
+
+export type DestroyCoreViewSortMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DestroyCoreViewSortMutation = { __typename?: 'Mutation', destroyCoreViewSort: boolean };
+
+export type UpdateCoreViewMutationVariables = Exact<{
+  id: Scalars['String'];
+  input: UpdateViewInput;
+}>;
+
+
+export type UpdateCoreViewMutation = { __typename?: 'Mutation', updateCoreView: { __typename?: 'CoreView', id: any, name: string, objectMetadataId: any, type: ViewType, key?: ViewKey | null, icon: string, position: number, isCompact: boolean, openRecordIn: ViewOpenRecordIn, kanbanAggregateOperation?: AggregateOperations | null, kanbanAggregateOperationFieldMetadataId?: any | null, createdAt: string, updatedAt: string, anyFieldFilterValue?: string | null } };
+
+export type UpdateCoreViewFieldMutationVariables = Exact<{
+  id: Scalars['String'];
+  input: UpdateViewFieldInput;
+}>;
+
+
+export type UpdateCoreViewFieldMutation = { __typename?: 'Mutation', updateCoreViewField: { __typename?: 'CoreViewField', id: any, fieldMetadataId: any, viewId: any, isVisible: boolean, position: number, size: number, aggregateOperation?: AggregateOperations | null, createdAt: string, updatedAt: string } };
+
+export type UpdateCoreViewFilterMutationVariables = Exact<{
+  id: Scalars['String'];
+  input: UpdateViewFilterInput;
+}>;
+
+
+export type UpdateCoreViewFilterMutation = { __typename?: 'Mutation', updateCoreViewFilter: { __typename?: 'CoreViewFilter', id: any, fieldMetadataId: any, operand: ViewFilterOperand, value: any, viewFilterGroupId?: any | null, positionInViewFilterGroup?: number | null, subFieldName?: string | null, viewId: any, createdAt: string, updatedAt: string } };
+
+export type UpdateCoreViewFilterGroupMutationVariables = Exact<{
+  id: Scalars['String'];
+  input: UpdateViewFilterGroupInput;
+}>;
+
+
+export type UpdateCoreViewFilterGroupMutation = { __typename?: 'Mutation', updateCoreViewFilterGroup: { __typename?: 'CoreViewFilterGroup', id: any, parentViewFilterGroupId?: any | null, logicalOperator: ViewFilterGroupLogicalOperator, positionInViewFilterGroup?: number | null, viewId: any, createdAt: string, updatedAt: string } };
+
+export type UpdateCoreViewGroupMutationVariables = Exact<{
+  id: Scalars['String'];
+  input: UpdateViewGroupInput;
+}>;
+
+
+export type UpdateCoreViewGroupMutation = { __typename?: 'Mutation', updateCoreViewGroup: { __typename?: 'CoreViewGroup', id: any, fieldMetadataId: any, isVisible: boolean, fieldValue: string, position: number, viewId: any, createdAt: string, updatedAt: string } };
+
+export type UpdateCoreViewSortMutationVariables = Exact<{
+  id: Scalars['String'];
+  input: UpdateViewSortInput;
+}>;
+
+
+export type UpdateCoreViewSortMutation = { __typename?: 'Mutation', updateCoreViewSort: { __typename?: 'CoreViewSort', id: any, fieldMetadataId: any, direction: ViewSortDirection, viewId: any, createdAt: string, updatedAt: string } };
+
+export type FindManyCoreViewFieldsQueryVariables = Exact<{
+  viewId: Scalars['String'];
+}>;
+
+
+export type FindManyCoreViewFieldsQuery = { __typename?: 'Query', getCoreViewFields: Array<{ __typename?: 'CoreViewField', id: any, fieldMetadataId: any, viewId: any, isVisible: boolean, position: number, size: number, aggregateOperation?: AggregateOperations | null, createdAt: string, updatedAt: string }> };
+
+export type FindManyCoreViewFilterGroupsQueryVariables = Exact<{
+  viewId?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type FindManyCoreViewFilterGroupsQuery = { __typename?: 'Query', getCoreViewFilterGroups: Array<{ __typename?: 'CoreViewFilterGroup', id: any, parentViewFilterGroupId?: any | null, logicalOperator: ViewFilterGroupLogicalOperator, positionInViewFilterGroup?: number | null, viewId: any, createdAt: string, updatedAt: string }> };
+
+export type FindManyCoreViewFiltersQueryVariables = Exact<{
+  viewId?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type FindManyCoreViewFiltersQuery = { __typename?: 'Query', getCoreViewFilters: Array<{ __typename?: 'CoreViewFilter', id: any, fieldMetadataId: any, operand: ViewFilterOperand, value: any, viewFilterGroupId?: any | null, positionInViewFilterGroup?: number | null, subFieldName?: string | null, viewId: any, createdAt: string, updatedAt: string }> };
+
+export type FindManyCoreViewGroupsQueryVariables = Exact<{
+  viewId?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type FindManyCoreViewGroupsQuery = { __typename?: 'Query', getCoreViewGroups: Array<{ __typename?: 'CoreViewGroup', id: any, fieldMetadataId: any, isVisible: boolean, fieldValue: string, position: number, viewId: any, createdAt: string, updatedAt: string }> };
+
+export type FindManyCoreViewSortsQueryVariables = Exact<{
+  viewId?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type FindManyCoreViewSortsQuery = { __typename?: 'Query', getCoreViewSorts: Array<{ __typename?: 'CoreViewSort', id: any, fieldMetadataId: any, direction: ViewSortDirection, viewId: any, createdAt: string, updatedAt: string }> };
+
+export type FindManyCoreViewsQueryVariables = Exact<{
+  objectMetadataId?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type FindManyCoreViewsQuery = { __typename?: 'Query', getCoreViews: Array<{ __typename?: 'CoreView', id: any, name: string, objectMetadataId: any, type: ViewType, key?: ViewKey | null, icon: string, position: number, isCompact: boolean, openRecordIn: ViewOpenRecordIn, kanbanAggregateOperation?: AggregateOperations | null, kanbanAggregateOperationFieldMetadataId?: any | null, createdAt: string, updatedAt: string, anyFieldFilterValue?: string | null }> };
+
+export type FindOneCoreViewQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type FindOneCoreViewQuery = { __typename?: 'Query', getCoreView?: { __typename?: 'CoreView', id: any, name: string, objectMetadataId: any, type: ViewType, key?: ViewKey | null, icon: string, position: number, isCompact: boolean, openRecordIn: ViewOpenRecordIn, kanbanAggregateOperation?: AggregateOperations | null, kanbanAggregateOperationFieldMetadataId?: any | null, createdAt: string, updatedAt: string, anyFieldFilterValue?: string | null } | null };
+
+export type FindOneCoreViewFieldQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type FindOneCoreViewFieldQuery = { __typename?: 'Query', getCoreViewField?: { __typename?: 'CoreViewField', id: any, fieldMetadataId: any, viewId: any, isVisible: boolean, position: number, size: number, aggregateOperation?: AggregateOperations | null, createdAt: string, updatedAt: string } | null };
+
+export type FindOneCoreViewFilterQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type FindOneCoreViewFilterQuery = { __typename?: 'Query', getCoreViewFilter?: { __typename?: 'CoreViewFilter', id: any, fieldMetadataId: any, operand: ViewFilterOperand, value: any, viewFilterGroupId?: any | null, positionInViewFilterGroup?: number | null, subFieldName?: string | null, viewId: any, createdAt: string, updatedAt: string } | null };
+
+export type FindOneCoreViewFilterGroupQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type FindOneCoreViewFilterGroupQuery = { __typename?: 'Query', getCoreViewFilterGroup?: { __typename?: 'CoreViewFilterGroup', id: any, parentViewFilterGroupId?: any | null, logicalOperator: ViewFilterGroupLogicalOperator, positionInViewFilterGroup?: number | null, viewId: any, createdAt: string, updatedAt: string } | null };
+
+export type FindOneCoreViewGroupQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type FindOneCoreViewGroupQuery = { __typename?: 'Query', getCoreViewGroup?: { __typename?: 'CoreViewGroup', id: any, fieldMetadataId: any, isVisible: boolean, fieldValue: string, position: number, viewId: any, createdAt: string, updatedAt: string } | null };
+
+export type FindOneCoreViewSortQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type FindOneCoreViewSortQuery = { __typename?: 'Query', getCoreViewSort?: { __typename?: 'CoreViewSort', id: any, fieldMetadataId: any, direction: ViewSortDirection, viewId: any, createdAt: string, updatedAt: string } | null };
+
+export const ViewFieldFragmentFragmentDoc = gql`
+    fragment ViewFieldFragment on CoreViewField {
+  id
+  fieldMetadataId
+  viewId
+  isVisible
+  position
+  size
+  aggregateOperation
+  createdAt
+  updatedAt
+}
+    `;
+export const ViewFilterFragmentFragmentDoc = gql`
+    fragment ViewFilterFragment on CoreViewFilter {
+  id
+  fieldMetadataId
+  operand
+  value
+  viewFilterGroupId
+  positionInViewFilterGroup
+  subFieldName
+  viewId
+  createdAt
+  updatedAt
+}
+    `;
+export const ViewFilterGroupFragmentFragmentDoc = gql`
+    fragment ViewFilterGroupFragment on CoreViewFilterGroup {
+  id
+  parentViewFilterGroupId
+  logicalOperator
+  positionInViewFilterGroup
+  viewId
+  createdAt
+  updatedAt
+}
+    `;
+export const ViewFragmentFragmentDoc = gql`
+    fragment ViewFragment on CoreView {
+  id
+  name
+  objectMetadataId
+  type
+  key
+  icon
+  position
+  isCompact
+  openRecordIn
+  kanbanAggregateOperation
+  kanbanAggregateOperationFieldMetadataId
+  createdAt
+  updatedAt
+  anyFieldFilterValue
+}
+    `;
+export const ViewGroupFragmentFragmentDoc = gql`
+    fragment ViewGroupFragment on CoreViewGroup {
+  id
+  fieldMetadataId
+  isVisible
+  fieldValue
+  position
+  viewId
+  createdAt
+  updatedAt
+}
+    `;
+export const ViewSortFragmentFragmentDoc = gql`
+    fragment ViewSortFragment on CoreViewSort {
+  id
+  fieldMetadataId
+  direction
+  viewId
+  createdAt
+  updatedAt
+}
+    `;
 export const SearchDocument = gql`
     query Search($searchInput: String!, $limit: Int!, $after: String, $excludedObjectNameSingulars: [String!], $includedObjectNameSingulars: [String!], $filter: ObjectRecordFilterInput) {
   search(
@@ -3017,3 +4033,1197 @@ export function useOnDbEventSubscription(baseOptions: Apollo.SubscriptionHookOpt
       }
 export type OnDbEventSubscriptionHookResult = ReturnType<typeof useOnDbEventSubscription>;
 export type OnDbEventSubscriptionResult = Apollo.SubscriptionResult<OnDbEventSubscription>;
+export const CreateCoreViewDocument = gql`
+    mutation CreateCoreView($input: CreateViewInput!) {
+  createCoreView(input: $input) {
+    ...ViewFragment
+  }
+}
+    ${ViewFragmentFragmentDoc}`;
+export type CreateCoreViewMutationFn = Apollo.MutationFunction<CreateCoreViewMutation, CreateCoreViewMutationVariables>;
+
+/**
+ * __useCreateCoreViewMutation__
+ *
+ * To run a mutation, you first call `useCreateCoreViewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCoreViewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCoreViewMutation, { data, loading, error }] = useCreateCoreViewMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCoreViewMutation(baseOptions?: Apollo.MutationHookOptions<CreateCoreViewMutation, CreateCoreViewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCoreViewMutation, CreateCoreViewMutationVariables>(CreateCoreViewDocument, options);
+      }
+export type CreateCoreViewMutationHookResult = ReturnType<typeof useCreateCoreViewMutation>;
+export type CreateCoreViewMutationResult = Apollo.MutationResult<CreateCoreViewMutation>;
+export type CreateCoreViewMutationOptions = Apollo.BaseMutationOptions<CreateCoreViewMutation, CreateCoreViewMutationVariables>;
+export const CreateCoreViewFieldDocument = gql`
+    mutation CreateCoreViewField($input: CreateViewFieldInput!) {
+  createCoreViewField(input: $input) {
+    ...ViewFieldFragment
+  }
+}
+    ${ViewFieldFragmentFragmentDoc}`;
+export type CreateCoreViewFieldMutationFn = Apollo.MutationFunction<CreateCoreViewFieldMutation, CreateCoreViewFieldMutationVariables>;
+
+/**
+ * __useCreateCoreViewFieldMutation__
+ *
+ * To run a mutation, you first call `useCreateCoreViewFieldMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCoreViewFieldMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCoreViewFieldMutation, { data, loading, error }] = useCreateCoreViewFieldMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCoreViewFieldMutation(baseOptions?: Apollo.MutationHookOptions<CreateCoreViewFieldMutation, CreateCoreViewFieldMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCoreViewFieldMutation, CreateCoreViewFieldMutationVariables>(CreateCoreViewFieldDocument, options);
+      }
+export type CreateCoreViewFieldMutationHookResult = ReturnType<typeof useCreateCoreViewFieldMutation>;
+export type CreateCoreViewFieldMutationResult = Apollo.MutationResult<CreateCoreViewFieldMutation>;
+export type CreateCoreViewFieldMutationOptions = Apollo.BaseMutationOptions<CreateCoreViewFieldMutation, CreateCoreViewFieldMutationVariables>;
+export const CreateCoreViewFilterDocument = gql`
+    mutation CreateCoreViewFilter($input: CreateViewFilterInput!) {
+  createCoreViewFilter(input: $input) {
+    ...ViewFilterFragment
+  }
+}
+    ${ViewFilterFragmentFragmentDoc}`;
+export type CreateCoreViewFilterMutationFn = Apollo.MutationFunction<CreateCoreViewFilterMutation, CreateCoreViewFilterMutationVariables>;
+
+/**
+ * __useCreateCoreViewFilterMutation__
+ *
+ * To run a mutation, you first call `useCreateCoreViewFilterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCoreViewFilterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCoreViewFilterMutation, { data, loading, error }] = useCreateCoreViewFilterMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCoreViewFilterMutation(baseOptions?: Apollo.MutationHookOptions<CreateCoreViewFilterMutation, CreateCoreViewFilterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCoreViewFilterMutation, CreateCoreViewFilterMutationVariables>(CreateCoreViewFilterDocument, options);
+      }
+export type CreateCoreViewFilterMutationHookResult = ReturnType<typeof useCreateCoreViewFilterMutation>;
+export type CreateCoreViewFilterMutationResult = Apollo.MutationResult<CreateCoreViewFilterMutation>;
+export type CreateCoreViewFilterMutationOptions = Apollo.BaseMutationOptions<CreateCoreViewFilterMutation, CreateCoreViewFilterMutationVariables>;
+export const CreateCoreViewFilterGroupDocument = gql`
+    mutation CreateCoreViewFilterGroup($input: CreateViewFilterGroupInput!) {
+  createCoreViewFilterGroup(input: $input) {
+    ...ViewFilterGroupFragment
+  }
+}
+    ${ViewFilterGroupFragmentFragmentDoc}`;
+export type CreateCoreViewFilterGroupMutationFn = Apollo.MutationFunction<CreateCoreViewFilterGroupMutation, CreateCoreViewFilterGroupMutationVariables>;
+
+/**
+ * __useCreateCoreViewFilterGroupMutation__
+ *
+ * To run a mutation, you first call `useCreateCoreViewFilterGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCoreViewFilterGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCoreViewFilterGroupMutation, { data, loading, error }] = useCreateCoreViewFilterGroupMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCoreViewFilterGroupMutation(baseOptions?: Apollo.MutationHookOptions<CreateCoreViewFilterGroupMutation, CreateCoreViewFilterGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCoreViewFilterGroupMutation, CreateCoreViewFilterGroupMutationVariables>(CreateCoreViewFilterGroupDocument, options);
+      }
+export type CreateCoreViewFilterGroupMutationHookResult = ReturnType<typeof useCreateCoreViewFilterGroupMutation>;
+export type CreateCoreViewFilterGroupMutationResult = Apollo.MutationResult<CreateCoreViewFilterGroupMutation>;
+export type CreateCoreViewFilterGroupMutationOptions = Apollo.BaseMutationOptions<CreateCoreViewFilterGroupMutation, CreateCoreViewFilterGroupMutationVariables>;
+export const CreateCoreViewGroupDocument = gql`
+    mutation CreateCoreViewGroup($input: CreateViewGroupInput!) {
+  createCoreViewGroup(input: $input) {
+    ...ViewGroupFragment
+  }
+}
+    ${ViewGroupFragmentFragmentDoc}`;
+export type CreateCoreViewGroupMutationFn = Apollo.MutationFunction<CreateCoreViewGroupMutation, CreateCoreViewGroupMutationVariables>;
+
+/**
+ * __useCreateCoreViewGroupMutation__
+ *
+ * To run a mutation, you first call `useCreateCoreViewGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCoreViewGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCoreViewGroupMutation, { data, loading, error }] = useCreateCoreViewGroupMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCoreViewGroupMutation(baseOptions?: Apollo.MutationHookOptions<CreateCoreViewGroupMutation, CreateCoreViewGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCoreViewGroupMutation, CreateCoreViewGroupMutationVariables>(CreateCoreViewGroupDocument, options);
+      }
+export type CreateCoreViewGroupMutationHookResult = ReturnType<typeof useCreateCoreViewGroupMutation>;
+export type CreateCoreViewGroupMutationResult = Apollo.MutationResult<CreateCoreViewGroupMutation>;
+export type CreateCoreViewGroupMutationOptions = Apollo.BaseMutationOptions<CreateCoreViewGroupMutation, CreateCoreViewGroupMutationVariables>;
+export const CreateCoreViewSortDocument = gql`
+    mutation CreateCoreViewSort($input: CreateViewSortInput!) {
+  createCoreViewSort(input: $input) {
+    ...ViewSortFragment
+  }
+}
+    ${ViewSortFragmentFragmentDoc}`;
+export type CreateCoreViewSortMutationFn = Apollo.MutationFunction<CreateCoreViewSortMutation, CreateCoreViewSortMutationVariables>;
+
+/**
+ * __useCreateCoreViewSortMutation__
+ *
+ * To run a mutation, you first call `useCreateCoreViewSortMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCoreViewSortMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCoreViewSortMutation, { data, loading, error }] = useCreateCoreViewSortMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCoreViewSortMutation(baseOptions?: Apollo.MutationHookOptions<CreateCoreViewSortMutation, CreateCoreViewSortMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCoreViewSortMutation, CreateCoreViewSortMutationVariables>(CreateCoreViewSortDocument, options);
+      }
+export type CreateCoreViewSortMutationHookResult = ReturnType<typeof useCreateCoreViewSortMutation>;
+export type CreateCoreViewSortMutationResult = Apollo.MutationResult<CreateCoreViewSortMutation>;
+export type CreateCoreViewSortMutationOptions = Apollo.BaseMutationOptions<CreateCoreViewSortMutation, CreateCoreViewSortMutationVariables>;
+export const DeleteCoreViewDocument = gql`
+    mutation DeleteCoreView($id: String!) {
+  deleteCoreView(id: $id)
+}
+    `;
+export type DeleteCoreViewMutationFn = Apollo.MutationFunction<DeleteCoreViewMutation, DeleteCoreViewMutationVariables>;
+
+/**
+ * __useDeleteCoreViewMutation__
+ *
+ * To run a mutation, you first call `useDeleteCoreViewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCoreViewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCoreViewMutation, { data, loading, error }] = useDeleteCoreViewMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCoreViewMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCoreViewMutation, DeleteCoreViewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCoreViewMutation, DeleteCoreViewMutationVariables>(DeleteCoreViewDocument, options);
+      }
+export type DeleteCoreViewMutationHookResult = ReturnType<typeof useDeleteCoreViewMutation>;
+export type DeleteCoreViewMutationResult = Apollo.MutationResult<DeleteCoreViewMutation>;
+export type DeleteCoreViewMutationOptions = Apollo.BaseMutationOptions<DeleteCoreViewMutation, DeleteCoreViewMutationVariables>;
+export const DeleteCoreViewFieldDocument = gql`
+    mutation DeleteCoreViewField($id: String!) {
+  deleteCoreViewField(id: $id)
+}
+    `;
+export type DeleteCoreViewFieldMutationFn = Apollo.MutationFunction<DeleteCoreViewFieldMutation, DeleteCoreViewFieldMutationVariables>;
+
+/**
+ * __useDeleteCoreViewFieldMutation__
+ *
+ * To run a mutation, you first call `useDeleteCoreViewFieldMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCoreViewFieldMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCoreViewFieldMutation, { data, loading, error }] = useDeleteCoreViewFieldMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCoreViewFieldMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCoreViewFieldMutation, DeleteCoreViewFieldMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCoreViewFieldMutation, DeleteCoreViewFieldMutationVariables>(DeleteCoreViewFieldDocument, options);
+      }
+export type DeleteCoreViewFieldMutationHookResult = ReturnType<typeof useDeleteCoreViewFieldMutation>;
+export type DeleteCoreViewFieldMutationResult = Apollo.MutationResult<DeleteCoreViewFieldMutation>;
+export type DeleteCoreViewFieldMutationOptions = Apollo.BaseMutationOptions<DeleteCoreViewFieldMutation, DeleteCoreViewFieldMutationVariables>;
+export const DeleteCoreViewFilterDocument = gql`
+    mutation DeleteCoreViewFilter($id: String!) {
+  deleteCoreViewFilter(id: $id)
+}
+    `;
+export type DeleteCoreViewFilterMutationFn = Apollo.MutationFunction<DeleteCoreViewFilterMutation, DeleteCoreViewFilterMutationVariables>;
+
+/**
+ * __useDeleteCoreViewFilterMutation__
+ *
+ * To run a mutation, you first call `useDeleteCoreViewFilterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCoreViewFilterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCoreViewFilterMutation, { data, loading, error }] = useDeleteCoreViewFilterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCoreViewFilterMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCoreViewFilterMutation, DeleteCoreViewFilterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCoreViewFilterMutation, DeleteCoreViewFilterMutationVariables>(DeleteCoreViewFilterDocument, options);
+      }
+export type DeleteCoreViewFilterMutationHookResult = ReturnType<typeof useDeleteCoreViewFilterMutation>;
+export type DeleteCoreViewFilterMutationResult = Apollo.MutationResult<DeleteCoreViewFilterMutation>;
+export type DeleteCoreViewFilterMutationOptions = Apollo.BaseMutationOptions<DeleteCoreViewFilterMutation, DeleteCoreViewFilterMutationVariables>;
+export const DeleteCoreViewFilterGroupDocument = gql`
+    mutation DeleteCoreViewFilterGroup($id: String!) {
+  deleteCoreViewFilterGroup(id: $id)
+}
+    `;
+export type DeleteCoreViewFilterGroupMutationFn = Apollo.MutationFunction<DeleteCoreViewFilterGroupMutation, DeleteCoreViewFilterGroupMutationVariables>;
+
+/**
+ * __useDeleteCoreViewFilterGroupMutation__
+ *
+ * To run a mutation, you first call `useDeleteCoreViewFilterGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCoreViewFilterGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCoreViewFilterGroupMutation, { data, loading, error }] = useDeleteCoreViewFilterGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCoreViewFilterGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCoreViewFilterGroupMutation, DeleteCoreViewFilterGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCoreViewFilterGroupMutation, DeleteCoreViewFilterGroupMutationVariables>(DeleteCoreViewFilterGroupDocument, options);
+      }
+export type DeleteCoreViewFilterGroupMutationHookResult = ReturnType<typeof useDeleteCoreViewFilterGroupMutation>;
+export type DeleteCoreViewFilterGroupMutationResult = Apollo.MutationResult<DeleteCoreViewFilterGroupMutation>;
+export type DeleteCoreViewFilterGroupMutationOptions = Apollo.BaseMutationOptions<DeleteCoreViewFilterGroupMutation, DeleteCoreViewFilterGroupMutationVariables>;
+export const DeleteCoreViewGroupDocument = gql`
+    mutation DeleteCoreViewGroup($id: String!) {
+  deleteCoreViewGroup(id: $id)
+}
+    `;
+export type DeleteCoreViewGroupMutationFn = Apollo.MutationFunction<DeleteCoreViewGroupMutation, DeleteCoreViewGroupMutationVariables>;
+
+/**
+ * __useDeleteCoreViewGroupMutation__
+ *
+ * To run a mutation, you first call `useDeleteCoreViewGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCoreViewGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCoreViewGroupMutation, { data, loading, error }] = useDeleteCoreViewGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCoreViewGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCoreViewGroupMutation, DeleteCoreViewGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCoreViewGroupMutation, DeleteCoreViewGroupMutationVariables>(DeleteCoreViewGroupDocument, options);
+      }
+export type DeleteCoreViewGroupMutationHookResult = ReturnType<typeof useDeleteCoreViewGroupMutation>;
+export type DeleteCoreViewGroupMutationResult = Apollo.MutationResult<DeleteCoreViewGroupMutation>;
+export type DeleteCoreViewGroupMutationOptions = Apollo.BaseMutationOptions<DeleteCoreViewGroupMutation, DeleteCoreViewGroupMutationVariables>;
+export const DeleteCoreViewSortDocument = gql`
+    mutation DeleteCoreViewSort($id: String!) {
+  deleteCoreViewSort(id: $id)
+}
+    `;
+export type DeleteCoreViewSortMutationFn = Apollo.MutationFunction<DeleteCoreViewSortMutation, DeleteCoreViewSortMutationVariables>;
+
+/**
+ * __useDeleteCoreViewSortMutation__
+ *
+ * To run a mutation, you first call `useDeleteCoreViewSortMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCoreViewSortMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCoreViewSortMutation, { data, loading, error }] = useDeleteCoreViewSortMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCoreViewSortMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCoreViewSortMutation, DeleteCoreViewSortMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCoreViewSortMutation, DeleteCoreViewSortMutationVariables>(DeleteCoreViewSortDocument, options);
+      }
+export type DeleteCoreViewSortMutationHookResult = ReturnType<typeof useDeleteCoreViewSortMutation>;
+export type DeleteCoreViewSortMutationResult = Apollo.MutationResult<DeleteCoreViewSortMutation>;
+export type DeleteCoreViewSortMutationOptions = Apollo.BaseMutationOptions<DeleteCoreViewSortMutation, DeleteCoreViewSortMutationVariables>;
+export const DestroyCoreViewDocument = gql`
+    mutation DestroyCoreView($id: String!) {
+  destroyCoreView(id: $id)
+}
+    `;
+export type DestroyCoreViewMutationFn = Apollo.MutationFunction<DestroyCoreViewMutation, DestroyCoreViewMutationVariables>;
+
+/**
+ * __useDestroyCoreViewMutation__
+ *
+ * To run a mutation, you first call `useDestroyCoreViewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyCoreViewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyCoreViewMutation, { data, loading, error }] = useDestroyCoreViewMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDestroyCoreViewMutation(baseOptions?: Apollo.MutationHookOptions<DestroyCoreViewMutation, DestroyCoreViewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyCoreViewMutation, DestroyCoreViewMutationVariables>(DestroyCoreViewDocument, options);
+      }
+export type DestroyCoreViewMutationHookResult = ReturnType<typeof useDestroyCoreViewMutation>;
+export type DestroyCoreViewMutationResult = Apollo.MutationResult<DestroyCoreViewMutation>;
+export type DestroyCoreViewMutationOptions = Apollo.BaseMutationOptions<DestroyCoreViewMutation, DestroyCoreViewMutationVariables>;
+export const DestroyCoreViewFieldDocument = gql`
+    mutation DestroyCoreViewField($id: String!) {
+  destroyCoreViewField(id: $id)
+}
+    `;
+export type DestroyCoreViewFieldMutationFn = Apollo.MutationFunction<DestroyCoreViewFieldMutation, DestroyCoreViewFieldMutationVariables>;
+
+/**
+ * __useDestroyCoreViewFieldMutation__
+ *
+ * To run a mutation, you first call `useDestroyCoreViewFieldMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyCoreViewFieldMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyCoreViewFieldMutation, { data, loading, error }] = useDestroyCoreViewFieldMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDestroyCoreViewFieldMutation(baseOptions?: Apollo.MutationHookOptions<DestroyCoreViewFieldMutation, DestroyCoreViewFieldMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyCoreViewFieldMutation, DestroyCoreViewFieldMutationVariables>(DestroyCoreViewFieldDocument, options);
+      }
+export type DestroyCoreViewFieldMutationHookResult = ReturnType<typeof useDestroyCoreViewFieldMutation>;
+export type DestroyCoreViewFieldMutationResult = Apollo.MutationResult<DestroyCoreViewFieldMutation>;
+export type DestroyCoreViewFieldMutationOptions = Apollo.BaseMutationOptions<DestroyCoreViewFieldMutation, DestroyCoreViewFieldMutationVariables>;
+export const DestroyCoreViewFilterDocument = gql`
+    mutation DestroyCoreViewFilter($id: String!) {
+  destroyCoreViewFilter(id: $id)
+}
+    `;
+export type DestroyCoreViewFilterMutationFn = Apollo.MutationFunction<DestroyCoreViewFilterMutation, DestroyCoreViewFilterMutationVariables>;
+
+/**
+ * __useDestroyCoreViewFilterMutation__
+ *
+ * To run a mutation, you first call `useDestroyCoreViewFilterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyCoreViewFilterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyCoreViewFilterMutation, { data, loading, error }] = useDestroyCoreViewFilterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDestroyCoreViewFilterMutation(baseOptions?: Apollo.MutationHookOptions<DestroyCoreViewFilterMutation, DestroyCoreViewFilterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyCoreViewFilterMutation, DestroyCoreViewFilterMutationVariables>(DestroyCoreViewFilterDocument, options);
+      }
+export type DestroyCoreViewFilterMutationHookResult = ReturnType<typeof useDestroyCoreViewFilterMutation>;
+export type DestroyCoreViewFilterMutationResult = Apollo.MutationResult<DestroyCoreViewFilterMutation>;
+export type DestroyCoreViewFilterMutationOptions = Apollo.BaseMutationOptions<DestroyCoreViewFilterMutation, DestroyCoreViewFilterMutationVariables>;
+export const DestroyCoreViewFilterGroupDocument = gql`
+    mutation DestroyCoreViewFilterGroup($id: String!) {
+  destroyCoreViewFilterGroup(id: $id)
+}
+    `;
+export type DestroyCoreViewFilterGroupMutationFn = Apollo.MutationFunction<DestroyCoreViewFilterGroupMutation, DestroyCoreViewFilterGroupMutationVariables>;
+
+/**
+ * __useDestroyCoreViewFilterGroupMutation__
+ *
+ * To run a mutation, you first call `useDestroyCoreViewFilterGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyCoreViewFilterGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyCoreViewFilterGroupMutation, { data, loading, error }] = useDestroyCoreViewFilterGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDestroyCoreViewFilterGroupMutation(baseOptions?: Apollo.MutationHookOptions<DestroyCoreViewFilterGroupMutation, DestroyCoreViewFilterGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyCoreViewFilterGroupMutation, DestroyCoreViewFilterGroupMutationVariables>(DestroyCoreViewFilterGroupDocument, options);
+      }
+export type DestroyCoreViewFilterGroupMutationHookResult = ReturnType<typeof useDestroyCoreViewFilterGroupMutation>;
+export type DestroyCoreViewFilterGroupMutationResult = Apollo.MutationResult<DestroyCoreViewFilterGroupMutation>;
+export type DestroyCoreViewFilterGroupMutationOptions = Apollo.BaseMutationOptions<DestroyCoreViewFilterGroupMutation, DestroyCoreViewFilterGroupMutationVariables>;
+export const DestroyCoreViewGroupDocument = gql`
+    mutation DestroyCoreViewGroup($id: String!) {
+  destroyCoreViewGroup(id: $id)
+}
+    `;
+export type DestroyCoreViewGroupMutationFn = Apollo.MutationFunction<DestroyCoreViewGroupMutation, DestroyCoreViewGroupMutationVariables>;
+
+/**
+ * __useDestroyCoreViewGroupMutation__
+ *
+ * To run a mutation, you first call `useDestroyCoreViewGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyCoreViewGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyCoreViewGroupMutation, { data, loading, error }] = useDestroyCoreViewGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDestroyCoreViewGroupMutation(baseOptions?: Apollo.MutationHookOptions<DestroyCoreViewGroupMutation, DestroyCoreViewGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyCoreViewGroupMutation, DestroyCoreViewGroupMutationVariables>(DestroyCoreViewGroupDocument, options);
+      }
+export type DestroyCoreViewGroupMutationHookResult = ReturnType<typeof useDestroyCoreViewGroupMutation>;
+export type DestroyCoreViewGroupMutationResult = Apollo.MutationResult<DestroyCoreViewGroupMutation>;
+export type DestroyCoreViewGroupMutationOptions = Apollo.BaseMutationOptions<DestroyCoreViewGroupMutation, DestroyCoreViewGroupMutationVariables>;
+export const DestroyCoreViewSortDocument = gql`
+    mutation DestroyCoreViewSort($id: String!) {
+  destroyCoreViewSort(id: $id)
+}
+    `;
+export type DestroyCoreViewSortMutationFn = Apollo.MutationFunction<DestroyCoreViewSortMutation, DestroyCoreViewSortMutationVariables>;
+
+/**
+ * __useDestroyCoreViewSortMutation__
+ *
+ * To run a mutation, you first call `useDestroyCoreViewSortMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyCoreViewSortMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyCoreViewSortMutation, { data, loading, error }] = useDestroyCoreViewSortMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDestroyCoreViewSortMutation(baseOptions?: Apollo.MutationHookOptions<DestroyCoreViewSortMutation, DestroyCoreViewSortMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyCoreViewSortMutation, DestroyCoreViewSortMutationVariables>(DestroyCoreViewSortDocument, options);
+      }
+export type DestroyCoreViewSortMutationHookResult = ReturnType<typeof useDestroyCoreViewSortMutation>;
+export type DestroyCoreViewSortMutationResult = Apollo.MutationResult<DestroyCoreViewSortMutation>;
+export type DestroyCoreViewSortMutationOptions = Apollo.BaseMutationOptions<DestroyCoreViewSortMutation, DestroyCoreViewSortMutationVariables>;
+export const UpdateCoreViewDocument = gql`
+    mutation UpdateCoreView($id: String!, $input: UpdateViewInput!) {
+  updateCoreView(id: $id, input: $input) {
+    ...ViewFragment
+  }
+}
+    ${ViewFragmentFragmentDoc}`;
+export type UpdateCoreViewMutationFn = Apollo.MutationFunction<UpdateCoreViewMutation, UpdateCoreViewMutationVariables>;
+
+/**
+ * __useUpdateCoreViewMutation__
+ *
+ * To run a mutation, you first call `useUpdateCoreViewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCoreViewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCoreViewMutation, { data, loading, error }] = useUpdateCoreViewMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCoreViewMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCoreViewMutation, UpdateCoreViewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCoreViewMutation, UpdateCoreViewMutationVariables>(UpdateCoreViewDocument, options);
+      }
+export type UpdateCoreViewMutationHookResult = ReturnType<typeof useUpdateCoreViewMutation>;
+export type UpdateCoreViewMutationResult = Apollo.MutationResult<UpdateCoreViewMutation>;
+export type UpdateCoreViewMutationOptions = Apollo.BaseMutationOptions<UpdateCoreViewMutation, UpdateCoreViewMutationVariables>;
+export const UpdateCoreViewFieldDocument = gql`
+    mutation UpdateCoreViewField($id: String!, $input: UpdateViewFieldInput!) {
+  updateCoreViewField(id: $id, input: $input) {
+    ...ViewFieldFragment
+  }
+}
+    ${ViewFieldFragmentFragmentDoc}`;
+export type UpdateCoreViewFieldMutationFn = Apollo.MutationFunction<UpdateCoreViewFieldMutation, UpdateCoreViewFieldMutationVariables>;
+
+/**
+ * __useUpdateCoreViewFieldMutation__
+ *
+ * To run a mutation, you first call `useUpdateCoreViewFieldMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCoreViewFieldMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCoreViewFieldMutation, { data, loading, error }] = useUpdateCoreViewFieldMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCoreViewFieldMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCoreViewFieldMutation, UpdateCoreViewFieldMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCoreViewFieldMutation, UpdateCoreViewFieldMutationVariables>(UpdateCoreViewFieldDocument, options);
+      }
+export type UpdateCoreViewFieldMutationHookResult = ReturnType<typeof useUpdateCoreViewFieldMutation>;
+export type UpdateCoreViewFieldMutationResult = Apollo.MutationResult<UpdateCoreViewFieldMutation>;
+export type UpdateCoreViewFieldMutationOptions = Apollo.BaseMutationOptions<UpdateCoreViewFieldMutation, UpdateCoreViewFieldMutationVariables>;
+export const UpdateCoreViewFilterDocument = gql`
+    mutation UpdateCoreViewFilter($id: String!, $input: UpdateViewFilterInput!) {
+  updateCoreViewFilter(id: $id, input: $input) {
+    ...ViewFilterFragment
+  }
+}
+    ${ViewFilterFragmentFragmentDoc}`;
+export type UpdateCoreViewFilterMutationFn = Apollo.MutationFunction<UpdateCoreViewFilterMutation, UpdateCoreViewFilterMutationVariables>;
+
+/**
+ * __useUpdateCoreViewFilterMutation__
+ *
+ * To run a mutation, you first call `useUpdateCoreViewFilterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCoreViewFilterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCoreViewFilterMutation, { data, loading, error }] = useUpdateCoreViewFilterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCoreViewFilterMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCoreViewFilterMutation, UpdateCoreViewFilterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCoreViewFilterMutation, UpdateCoreViewFilterMutationVariables>(UpdateCoreViewFilterDocument, options);
+      }
+export type UpdateCoreViewFilterMutationHookResult = ReturnType<typeof useUpdateCoreViewFilterMutation>;
+export type UpdateCoreViewFilterMutationResult = Apollo.MutationResult<UpdateCoreViewFilterMutation>;
+export type UpdateCoreViewFilterMutationOptions = Apollo.BaseMutationOptions<UpdateCoreViewFilterMutation, UpdateCoreViewFilterMutationVariables>;
+export const UpdateCoreViewFilterGroupDocument = gql`
+    mutation UpdateCoreViewFilterGroup($id: String!, $input: UpdateViewFilterGroupInput!) {
+  updateCoreViewFilterGroup(id: $id, input: $input) {
+    ...ViewFilterGroupFragment
+  }
+}
+    ${ViewFilterGroupFragmentFragmentDoc}`;
+export type UpdateCoreViewFilterGroupMutationFn = Apollo.MutationFunction<UpdateCoreViewFilterGroupMutation, UpdateCoreViewFilterGroupMutationVariables>;
+
+/**
+ * __useUpdateCoreViewFilterGroupMutation__
+ *
+ * To run a mutation, you first call `useUpdateCoreViewFilterGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCoreViewFilterGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCoreViewFilterGroupMutation, { data, loading, error }] = useUpdateCoreViewFilterGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCoreViewFilterGroupMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCoreViewFilterGroupMutation, UpdateCoreViewFilterGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCoreViewFilterGroupMutation, UpdateCoreViewFilterGroupMutationVariables>(UpdateCoreViewFilterGroupDocument, options);
+      }
+export type UpdateCoreViewFilterGroupMutationHookResult = ReturnType<typeof useUpdateCoreViewFilterGroupMutation>;
+export type UpdateCoreViewFilterGroupMutationResult = Apollo.MutationResult<UpdateCoreViewFilterGroupMutation>;
+export type UpdateCoreViewFilterGroupMutationOptions = Apollo.BaseMutationOptions<UpdateCoreViewFilterGroupMutation, UpdateCoreViewFilterGroupMutationVariables>;
+export const UpdateCoreViewGroupDocument = gql`
+    mutation UpdateCoreViewGroup($id: String!, $input: UpdateViewGroupInput!) {
+  updateCoreViewGroup(id: $id, input: $input) {
+    ...ViewGroupFragment
+  }
+}
+    ${ViewGroupFragmentFragmentDoc}`;
+export type UpdateCoreViewGroupMutationFn = Apollo.MutationFunction<UpdateCoreViewGroupMutation, UpdateCoreViewGroupMutationVariables>;
+
+/**
+ * __useUpdateCoreViewGroupMutation__
+ *
+ * To run a mutation, you first call `useUpdateCoreViewGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCoreViewGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCoreViewGroupMutation, { data, loading, error }] = useUpdateCoreViewGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCoreViewGroupMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCoreViewGroupMutation, UpdateCoreViewGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCoreViewGroupMutation, UpdateCoreViewGroupMutationVariables>(UpdateCoreViewGroupDocument, options);
+      }
+export type UpdateCoreViewGroupMutationHookResult = ReturnType<typeof useUpdateCoreViewGroupMutation>;
+export type UpdateCoreViewGroupMutationResult = Apollo.MutationResult<UpdateCoreViewGroupMutation>;
+export type UpdateCoreViewGroupMutationOptions = Apollo.BaseMutationOptions<UpdateCoreViewGroupMutation, UpdateCoreViewGroupMutationVariables>;
+export const UpdateCoreViewSortDocument = gql`
+    mutation UpdateCoreViewSort($id: String!, $input: UpdateViewSortInput!) {
+  updateCoreViewSort(id: $id, input: $input) {
+    ...ViewSortFragment
+  }
+}
+    ${ViewSortFragmentFragmentDoc}`;
+export type UpdateCoreViewSortMutationFn = Apollo.MutationFunction<UpdateCoreViewSortMutation, UpdateCoreViewSortMutationVariables>;
+
+/**
+ * __useUpdateCoreViewSortMutation__
+ *
+ * To run a mutation, you first call `useUpdateCoreViewSortMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCoreViewSortMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCoreViewSortMutation, { data, loading, error }] = useUpdateCoreViewSortMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCoreViewSortMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCoreViewSortMutation, UpdateCoreViewSortMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCoreViewSortMutation, UpdateCoreViewSortMutationVariables>(UpdateCoreViewSortDocument, options);
+      }
+export type UpdateCoreViewSortMutationHookResult = ReturnType<typeof useUpdateCoreViewSortMutation>;
+export type UpdateCoreViewSortMutationResult = Apollo.MutationResult<UpdateCoreViewSortMutation>;
+export type UpdateCoreViewSortMutationOptions = Apollo.BaseMutationOptions<UpdateCoreViewSortMutation, UpdateCoreViewSortMutationVariables>;
+export const FindManyCoreViewFieldsDocument = gql`
+    query FindManyCoreViewFields($viewId: String!) {
+  getCoreViewFields(viewId: $viewId) {
+    ...ViewFieldFragment
+  }
+}
+    ${ViewFieldFragmentFragmentDoc}`;
+
+/**
+ * __useFindManyCoreViewFieldsQuery__
+ *
+ * To run a query within a React component, call `useFindManyCoreViewFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindManyCoreViewFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindManyCoreViewFieldsQuery({
+ *   variables: {
+ *      viewId: // value for 'viewId'
+ *   },
+ * });
+ */
+export function useFindManyCoreViewFieldsQuery(baseOptions: Apollo.QueryHookOptions<FindManyCoreViewFieldsQuery, FindManyCoreViewFieldsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindManyCoreViewFieldsQuery, FindManyCoreViewFieldsQueryVariables>(FindManyCoreViewFieldsDocument, options);
+      }
+export function useFindManyCoreViewFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindManyCoreViewFieldsQuery, FindManyCoreViewFieldsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindManyCoreViewFieldsQuery, FindManyCoreViewFieldsQueryVariables>(FindManyCoreViewFieldsDocument, options);
+        }
+export type FindManyCoreViewFieldsQueryHookResult = ReturnType<typeof useFindManyCoreViewFieldsQuery>;
+export type FindManyCoreViewFieldsLazyQueryHookResult = ReturnType<typeof useFindManyCoreViewFieldsLazyQuery>;
+export type FindManyCoreViewFieldsQueryResult = Apollo.QueryResult<FindManyCoreViewFieldsQuery, FindManyCoreViewFieldsQueryVariables>;
+export const FindManyCoreViewFilterGroupsDocument = gql`
+    query FindManyCoreViewFilterGroups($viewId: String) {
+  getCoreViewFilterGroups(viewId: $viewId) {
+    ...ViewFilterGroupFragment
+  }
+}
+    ${ViewFilterGroupFragmentFragmentDoc}`;
+
+/**
+ * __useFindManyCoreViewFilterGroupsQuery__
+ *
+ * To run a query within a React component, call `useFindManyCoreViewFilterGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindManyCoreViewFilterGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindManyCoreViewFilterGroupsQuery({
+ *   variables: {
+ *      viewId: // value for 'viewId'
+ *   },
+ * });
+ */
+export function useFindManyCoreViewFilterGroupsQuery(baseOptions?: Apollo.QueryHookOptions<FindManyCoreViewFilterGroupsQuery, FindManyCoreViewFilterGroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindManyCoreViewFilterGroupsQuery, FindManyCoreViewFilterGroupsQueryVariables>(FindManyCoreViewFilterGroupsDocument, options);
+      }
+export function useFindManyCoreViewFilterGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindManyCoreViewFilterGroupsQuery, FindManyCoreViewFilterGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindManyCoreViewFilterGroupsQuery, FindManyCoreViewFilterGroupsQueryVariables>(FindManyCoreViewFilterGroupsDocument, options);
+        }
+export type FindManyCoreViewFilterGroupsQueryHookResult = ReturnType<typeof useFindManyCoreViewFilterGroupsQuery>;
+export type FindManyCoreViewFilterGroupsLazyQueryHookResult = ReturnType<typeof useFindManyCoreViewFilterGroupsLazyQuery>;
+export type FindManyCoreViewFilterGroupsQueryResult = Apollo.QueryResult<FindManyCoreViewFilterGroupsQuery, FindManyCoreViewFilterGroupsQueryVariables>;
+export const FindManyCoreViewFiltersDocument = gql`
+    query FindManyCoreViewFilters($viewId: String) {
+  getCoreViewFilters(viewId: $viewId) {
+    ...ViewFilterFragment
+  }
+}
+    ${ViewFilterFragmentFragmentDoc}`;
+
+/**
+ * __useFindManyCoreViewFiltersQuery__
+ *
+ * To run a query within a React component, call `useFindManyCoreViewFiltersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindManyCoreViewFiltersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindManyCoreViewFiltersQuery({
+ *   variables: {
+ *      viewId: // value for 'viewId'
+ *   },
+ * });
+ */
+export function useFindManyCoreViewFiltersQuery(baseOptions?: Apollo.QueryHookOptions<FindManyCoreViewFiltersQuery, FindManyCoreViewFiltersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindManyCoreViewFiltersQuery, FindManyCoreViewFiltersQueryVariables>(FindManyCoreViewFiltersDocument, options);
+      }
+export function useFindManyCoreViewFiltersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindManyCoreViewFiltersQuery, FindManyCoreViewFiltersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindManyCoreViewFiltersQuery, FindManyCoreViewFiltersQueryVariables>(FindManyCoreViewFiltersDocument, options);
+        }
+export type FindManyCoreViewFiltersQueryHookResult = ReturnType<typeof useFindManyCoreViewFiltersQuery>;
+export type FindManyCoreViewFiltersLazyQueryHookResult = ReturnType<typeof useFindManyCoreViewFiltersLazyQuery>;
+export type FindManyCoreViewFiltersQueryResult = Apollo.QueryResult<FindManyCoreViewFiltersQuery, FindManyCoreViewFiltersQueryVariables>;
+export const FindManyCoreViewGroupsDocument = gql`
+    query FindManyCoreViewGroups($viewId: String) {
+  getCoreViewGroups(viewId: $viewId) {
+    ...ViewGroupFragment
+  }
+}
+    ${ViewGroupFragmentFragmentDoc}`;
+
+/**
+ * __useFindManyCoreViewGroupsQuery__
+ *
+ * To run a query within a React component, call `useFindManyCoreViewGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindManyCoreViewGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindManyCoreViewGroupsQuery({
+ *   variables: {
+ *      viewId: // value for 'viewId'
+ *   },
+ * });
+ */
+export function useFindManyCoreViewGroupsQuery(baseOptions?: Apollo.QueryHookOptions<FindManyCoreViewGroupsQuery, FindManyCoreViewGroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindManyCoreViewGroupsQuery, FindManyCoreViewGroupsQueryVariables>(FindManyCoreViewGroupsDocument, options);
+      }
+export function useFindManyCoreViewGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindManyCoreViewGroupsQuery, FindManyCoreViewGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindManyCoreViewGroupsQuery, FindManyCoreViewGroupsQueryVariables>(FindManyCoreViewGroupsDocument, options);
+        }
+export type FindManyCoreViewGroupsQueryHookResult = ReturnType<typeof useFindManyCoreViewGroupsQuery>;
+export type FindManyCoreViewGroupsLazyQueryHookResult = ReturnType<typeof useFindManyCoreViewGroupsLazyQuery>;
+export type FindManyCoreViewGroupsQueryResult = Apollo.QueryResult<FindManyCoreViewGroupsQuery, FindManyCoreViewGroupsQueryVariables>;
+export const FindManyCoreViewSortsDocument = gql`
+    query FindManyCoreViewSorts($viewId: String) {
+  getCoreViewSorts(viewId: $viewId) {
+    ...ViewSortFragment
+  }
+}
+    ${ViewSortFragmentFragmentDoc}`;
+
+/**
+ * __useFindManyCoreViewSortsQuery__
+ *
+ * To run a query within a React component, call `useFindManyCoreViewSortsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindManyCoreViewSortsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindManyCoreViewSortsQuery({
+ *   variables: {
+ *      viewId: // value for 'viewId'
+ *   },
+ * });
+ */
+export function useFindManyCoreViewSortsQuery(baseOptions?: Apollo.QueryHookOptions<FindManyCoreViewSortsQuery, FindManyCoreViewSortsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindManyCoreViewSortsQuery, FindManyCoreViewSortsQueryVariables>(FindManyCoreViewSortsDocument, options);
+      }
+export function useFindManyCoreViewSortsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindManyCoreViewSortsQuery, FindManyCoreViewSortsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindManyCoreViewSortsQuery, FindManyCoreViewSortsQueryVariables>(FindManyCoreViewSortsDocument, options);
+        }
+export type FindManyCoreViewSortsQueryHookResult = ReturnType<typeof useFindManyCoreViewSortsQuery>;
+export type FindManyCoreViewSortsLazyQueryHookResult = ReturnType<typeof useFindManyCoreViewSortsLazyQuery>;
+export type FindManyCoreViewSortsQueryResult = Apollo.QueryResult<FindManyCoreViewSortsQuery, FindManyCoreViewSortsQueryVariables>;
+export const FindManyCoreViewsDocument = gql`
+    query FindManyCoreViews($objectMetadataId: String) {
+  getCoreViews(objectMetadataId: $objectMetadataId) {
+    ...ViewFragment
+  }
+}
+    ${ViewFragmentFragmentDoc}`;
+
+/**
+ * __useFindManyCoreViewsQuery__
+ *
+ * To run a query within a React component, call `useFindManyCoreViewsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindManyCoreViewsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindManyCoreViewsQuery({
+ *   variables: {
+ *      objectMetadataId: // value for 'objectMetadataId'
+ *   },
+ * });
+ */
+export function useFindManyCoreViewsQuery(baseOptions?: Apollo.QueryHookOptions<FindManyCoreViewsQuery, FindManyCoreViewsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindManyCoreViewsQuery, FindManyCoreViewsQueryVariables>(FindManyCoreViewsDocument, options);
+      }
+export function useFindManyCoreViewsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindManyCoreViewsQuery, FindManyCoreViewsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindManyCoreViewsQuery, FindManyCoreViewsQueryVariables>(FindManyCoreViewsDocument, options);
+        }
+export type FindManyCoreViewsQueryHookResult = ReturnType<typeof useFindManyCoreViewsQuery>;
+export type FindManyCoreViewsLazyQueryHookResult = ReturnType<typeof useFindManyCoreViewsLazyQuery>;
+export type FindManyCoreViewsQueryResult = Apollo.QueryResult<FindManyCoreViewsQuery, FindManyCoreViewsQueryVariables>;
+export const FindOneCoreViewDocument = gql`
+    query FindOneCoreView($id: String!) {
+  getCoreView(id: $id) {
+    ...ViewFragment
+  }
+}
+    ${ViewFragmentFragmentDoc}`;
+
+/**
+ * __useFindOneCoreViewQuery__
+ *
+ * To run a query within a React component, call `useFindOneCoreViewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindOneCoreViewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindOneCoreViewQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindOneCoreViewQuery(baseOptions: Apollo.QueryHookOptions<FindOneCoreViewQuery, FindOneCoreViewQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindOneCoreViewQuery, FindOneCoreViewQueryVariables>(FindOneCoreViewDocument, options);
+      }
+export function useFindOneCoreViewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindOneCoreViewQuery, FindOneCoreViewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindOneCoreViewQuery, FindOneCoreViewQueryVariables>(FindOneCoreViewDocument, options);
+        }
+export type FindOneCoreViewQueryHookResult = ReturnType<typeof useFindOneCoreViewQuery>;
+export type FindOneCoreViewLazyQueryHookResult = ReturnType<typeof useFindOneCoreViewLazyQuery>;
+export type FindOneCoreViewQueryResult = Apollo.QueryResult<FindOneCoreViewQuery, FindOneCoreViewQueryVariables>;
+export const FindOneCoreViewFieldDocument = gql`
+    query FindOneCoreViewField($id: String!) {
+  getCoreViewField(id: $id) {
+    ...ViewFieldFragment
+  }
+}
+    ${ViewFieldFragmentFragmentDoc}`;
+
+/**
+ * __useFindOneCoreViewFieldQuery__
+ *
+ * To run a query within a React component, call `useFindOneCoreViewFieldQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindOneCoreViewFieldQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindOneCoreViewFieldQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindOneCoreViewFieldQuery(baseOptions: Apollo.QueryHookOptions<FindOneCoreViewFieldQuery, FindOneCoreViewFieldQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindOneCoreViewFieldQuery, FindOneCoreViewFieldQueryVariables>(FindOneCoreViewFieldDocument, options);
+      }
+export function useFindOneCoreViewFieldLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindOneCoreViewFieldQuery, FindOneCoreViewFieldQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindOneCoreViewFieldQuery, FindOneCoreViewFieldQueryVariables>(FindOneCoreViewFieldDocument, options);
+        }
+export type FindOneCoreViewFieldQueryHookResult = ReturnType<typeof useFindOneCoreViewFieldQuery>;
+export type FindOneCoreViewFieldLazyQueryHookResult = ReturnType<typeof useFindOneCoreViewFieldLazyQuery>;
+export type FindOneCoreViewFieldQueryResult = Apollo.QueryResult<FindOneCoreViewFieldQuery, FindOneCoreViewFieldQueryVariables>;
+export const FindOneCoreViewFilterDocument = gql`
+    query FindOneCoreViewFilter($id: String!) {
+  getCoreViewFilter(id: $id) {
+    ...ViewFilterFragment
+  }
+}
+    ${ViewFilterFragmentFragmentDoc}`;
+
+/**
+ * __useFindOneCoreViewFilterQuery__
+ *
+ * To run a query within a React component, call `useFindOneCoreViewFilterQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindOneCoreViewFilterQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindOneCoreViewFilterQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindOneCoreViewFilterQuery(baseOptions: Apollo.QueryHookOptions<FindOneCoreViewFilterQuery, FindOneCoreViewFilterQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindOneCoreViewFilterQuery, FindOneCoreViewFilterQueryVariables>(FindOneCoreViewFilterDocument, options);
+      }
+export function useFindOneCoreViewFilterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindOneCoreViewFilterQuery, FindOneCoreViewFilterQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindOneCoreViewFilterQuery, FindOneCoreViewFilterQueryVariables>(FindOneCoreViewFilterDocument, options);
+        }
+export type FindOneCoreViewFilterQueryHookResult = ReturnType<typeof useFindOneCoreViewFilterQuery>;
+export type FindOneCoreViewFilterLazyQueryHookResult = ReturnType<typeof useFindOneCoreViewFilterLazyQuery>;
+export type FindOneCoreViewFilterQueryResult = Apollo.QueryResult<FindOneCoreViewFilterQuery, FindOneCoreViewFilterQueryVariables>;
+export const FindOneCoreViewFilterGroupDocument = gql`
+    query FindOneCoreViewFilterGroup($id: String!) {
+  getCoreViewFilterGroup(id: $id) {
+    ...ViewFilterGroupFragment
+  }
+}
+    ${ViewFilterGroupFragmentFragmentDoc}`;
+
+/**
+ * __useFindOneCoreViewFilterGroupQuery__
+ *
+ * To run a query within a React component, call `useFindOneCoreViewFilterGroupQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindOneCoreViewFilterGroupQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindOneCoreViewFilterGroupQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindOneCoreViewFilterGroupQuery(baseOptions: Apollo.QueryHookOptions<FindOneCoreViewFilterGroupQuery, FindOneCoreViewFilterGroupQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindOneCoreViewFilterGroupQuery, FindOneCoreViewFilterGroupQueryVariables>(FindOneCoreViewFilterGroupDocument, options);
+      }
+export function useFindOneCoreViewFilterGroupLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindOneCoreViewFilterGroupQuery, FindOneCoreViewFilterGroupQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindOneCoreViewFilterGroupQuery, FindOneCoreViewFilterGroupQueryVariables>(FindOneCoreViewFilterGroupDocument, options);
+        }
+export type FindOneCoreViewFilterGroupQueryHookResult = ReturnType<typeof useFindOneCoreViewFilterGroupQuery>;
+export type FindOneCoreViewFilterGroupLazyQueryHookResult = ReturnType<typeof useFindOneCoreViewFilterGroupLazyQuery>;
+export type FindOneCoreViewFilterGroupQueryResult = Apollo.QueryResult<FindOneCoreViewFilterGroupQuery, FindOneCoreViewFilterGroupQueryVariables>;
+export const FindOneCoreViewGroupDocument = gql`
+    query FindOneCoreViewGroup($id: String!) {
+  getCoreViewGroup(id: $id) {
+    ...ViewGroupFragment
+  }
+}
+    ${ViewGroupFragmentFragmentDoc}`;
+
+/**
+ * __useFindOneCoreViewGroupQuery__
+ *
+ * To run a query within a React component, call `useFindOneCoreViewGroupQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindOneCoreViewGroupQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindOneCoreViewGroupQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindOneCoreViewGroupQuery(baseOptions: Apollo.QueryHookOptions<FindOneCoreViewGroupQuery, FindOneCoreViewGroupQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindOneCoreViewGroupQuery, FindOneCoreViewGroupQueryVariables>(FindOneCoreViewGroupDocument, options);
+      }
+export function useFindOneCoreViewGroupLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindOneCoreViewGroupQuery, FindOneCoreViewGroupQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindOneCoreViewGroupQuery, FindOneCoreViewGroupQueryVariables>(FindOneCoreViewGroupDocument, options);
+        }
+export type FindOneCoreViewGroupQueryHookResult = ReturnType<typeof useFindOneCoreViewGroupQuery>;
+export type FindOneCoreViewGroupLazyQueryHookResult = ReturnType<typeof useFindOneCoreViewGroupLazyQuery>;
+export type FindOneCoreViewGroupQueryResult = Apollo.QueryResult<FindOneCoreViewGroupQuery, FindOneCoreViewGroupQueryVariables>;
+export const FindOneCoreViewSortDocument = gql`
+    query FindOneCoreViewSort($id: String!) {
+  getCoreViewSort(id: $id) {
+    ...ViewSortFragment
+  }
+}
+    ${ViewSortFragmentFragmentDoc}`;
+
+/**
+ * __useFindOneCoreViewSortQuery__
+ *
+ * To run a query within a React component, call `useFindOneCoreViewSortQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindOneCoreViewSortQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindOneCoreViewSortQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindOneCoreViewSortQuery(baseOptions: Apollo.QueryHookOptions<FindOneCoreViewSortQuery, FindOneCoreViewSortQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindOneCoreViewSortQuery, FindOneCoreViewSortQueryVariables>(FindOneCoreViewSortDocument, options);
+      }
+export function useFindOneCoreViewSortLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindOneCoreViewSortQuery, FindOneCoreViewSortQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindOneCoreViewSortQuery, FindOneCoreViewSortQueryVariables>(FindOneCoreViewSortDocument, options);
+        }
+export type FindOneCoreViewSortQueryHookResult = ReturnType<typeof useFindOneCoreViewSortQuery>;
+export type FindOneCoreViewSortLazyQueryHookResult = ReturnType<typeof useFindOneCoreViewSortLazyQuery>;
+export type FindOneCoreViewSortQueryResult = Apollo.QueryResult<FindOneCoreViewSortQuery, FindOneCoreViewSortQueryVariables>;

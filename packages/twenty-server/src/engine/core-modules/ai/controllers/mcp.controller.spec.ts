@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 
 import { McpService } from 'src/engine/core-modules/ai/services/mcp.service';
-import { JsonRpc } from 'src/engine/core-modules/ai/dtos/json-rpc';
-import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
+import { type JsonRpc } from 'src/engine/core-modules/ai/dtos/json-rpc';
+import { type Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { MCP_SERVER_METADATA } from 'src/engine/core-modules/ai/constants/mcp.const';
 import { AccessTokenService } from 'src/engine/core-modules/auth/token/services/access-token.service';
 import { WorkspaceCacheStorageService } from 'src/engine/workspace-cache-storage/workspace-cache-storage.service';
@@ -15,7 +15,7 @@ describe('McpController', () => {
 
   beforeEach(async () => {
     const mockMcpService = {
-      executeTool: jest.fn(),
+      handleMCPCoreQuery: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -44,12 +44,12 @@ describe('McpController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('executeTool', () => {
+  describe('handleMcpCore', () => {
     const mockWorkspace = { id: 'workspace-1' } as Workspace;
     const mockUserWorkspaceId = 'user-workspace-1';
     const mockApiKey = 'api-key-1';
 
-    it('should call mcpService.executeTool with correct parameters', async () => {
+    it('should call mcpService.handleMCPCoreQuery with correct parameters', async () => {
       const mockRequest: JsonRpc = {
         jsonrpc: '2.0',
         method: 'tools/call',
@@ -66,16 +66,16 @@ describe('McpController', () => {
         },
       };
 
-      mcpService.executeTool.mockResolvedValue(mockResponse);
+      mcpService.handleMCPCoreQuery.mockResolvedValue(mockResponse);
 
-      const result = await controller.executeMcpMethods(
+      const result = await controller.handleMcpCore(
         mockRequest,
         mockWorkspace,
         mockApiKey,
         mockUserWorkspaceId,
       );
 
-      expect(mcpService.executeTool).toHaveBeenCalledWith(mockRequest, {
+      expect(mcpService.handleMCPCoreQuery).toHaveBeenCalledWith(mockRequest, {
         workspace: mockWorkspace,
         userWorkspaceId: mockUserWorkspaceId,
         apiKey: mockApiKey,
@@ -103,16 +103,16 @@ describe('McpController', () => {
         },
       };
 
-      mcpService.executeTool.mockResolvedValue(mockResponse);
+      mcpService.handleMCPCoreQuery.mockResolvedValue(mockResponse);
 
-      const result = await controller.executeMcpMethods(
+      const result = await controller.handleMcpCore(
         mockRequest,
         mockWorkspace,
         mockApiKey,
         mockUserWorkspaceId,
       );
 
-      expect(mcpService.executeTool).toHaveBeenCalledWith(mockRequest, {
+      expect(mcpService.handleMCPCoreQuery).toHaveBeenCalledWith(mockRequest, {
         workspace: mockWorkspace,
         userWorkspaceId: mockUserWorkspaceId,
         apiKey: mockApiKey,
@@ -145,16 +145,16 @@ describe('McpController', () => {
         },
       };
 
-      mcpService.executeTool.mockResolvedValue(mockResponse);
+      mcpService.handleMCPCoreQuery.mockResolvedValue(mockResponse);
 
-      const result = await controller.executeMcpMethods(
+      const result = await controller.handleMcpCore(
         mockRequest,
         mockWorkspace,
         mockApiKey,
         mockUserWorkspaceId,
       );
 
-      expect(mcpService.executeTool).toHaveBeenCalledWith(mockRequest, {
+      expect(mcpService.handleMCPCoreQuery).toHaveBeenCalledWith(mockRequest, {
         workspace: mockWorkspace,
         userWorkspaceId: mockUserWorkspaceId,
         apiKey: mockApiKey,

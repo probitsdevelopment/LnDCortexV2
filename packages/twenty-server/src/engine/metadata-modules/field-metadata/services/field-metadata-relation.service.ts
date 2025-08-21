@@ -4,29 +4,31 @@ import { t } from '@lingui/core/macro';
 import { IsEnum, IsString, IsUUID } from 'class-validator';
 import { FieldMetadataType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
-import { Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
-import { FieldMetadataSettings } from 'src/engine/metadata-modules/field-metadata/interfaces/field-metadata-settings.interface';
+import { type FieldMetadataSettings } from 'src/engine/metadata-modules/field-metadata/interfaces/field-metadata-settings.interface';
 import { RelationType } from 'src/engine/metadata-modules/field-metadata/interfaces/relation-type.interface';
 
-import { CreateFieldInput } from 'src/engine/metadata-modules/field-metadata/dtos/create-field.input';
-import { UpdateFieldInput } from 'src/engine/metadata-modules/field-metadata/dtos/update-field.input';
-import { FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
+import { filterMorphRelationDuplicateFieldsDTO } from 'src/engine/dataloaders/utils/filter-morph-relation-duplicate-fields.util';
+import { type CreateFieldInput } from 'src/engine/metadata-modules/field-metadata/dtos/create-field.input';
+import { type UpdateFieldInput } from 'src/engine/metadata-modules/field-metadata/dtos/update-field.input';
+import { type FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
 import {
   FieldMetadataException,
   FieldMetadataExceptionCode,
 } from 'src/engine/metadata-modules/field-metadata/field-metadata.exception';
 import { computeRelationFieldJoinColumnName } from 'src/engine/metadata-modules/field-metadata/utils/compute-relation-field-join-column-name.util';
+import { isFieldMetadataTypeMorphRelation } from 'src/engine/metadata-modules/field-metadata/utils/is-field-metadata-type-morph-relation.util';
 import { prepareCustomFieldMetadataForCreation } from 'src/engine/metadata-modules/field-metadata/utils/prepare-field-metadata-for-creation.util';
-import { validateRelationCreationPayloadOrThrow } from 'src/engine/metadata-modules/field-metadata/utils/validate-relation-creation-payload.util';
-import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
+import { validateRelationCreationPayloadOrThrow } from 'src/engine/metadata-modules/field-metadata/utils/validate-relation-creation-payload-or-throw.util';
+import { type ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
 import { RelationOnDeleteAction } from 'src/engine/metadata-modules/relation-metadata/relation-on-delete-action.type';
-import { ObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/types/object-metadata-item-with-field-maps';
-import { ObjectMetadataMaps } from 'src/engine/metadata-modules/types/object-metadata-maps';
+import { type ObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/types/object-metadata-item-with-field-maps';
+import { type ObjectMetadataMaps } from 'src/engine/metadata-modules/types/object-metadata-maps';
 import { getObjectMetadataFromObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/utils/get-object-metadata-from-object-metadata-Item-with-field-maps';
 import { validateFieldNameAvailabilityOrThrow } from 'src/engine/metadata-modules/utils/validate-field-name-availability.utils';
-import { validateMetadataNameOrThrow } from 'src/engine/metadata-modules/utils/validate-metadata-name.utils';
+import { validateMetadataNameOrThrow } from 'src/engine/metadata-modules/utils/validate-metadata-name-or-throw.utils';
 import { computeMetadataNameFromLabel } from 'src/engine/metadata-modules/utils/validate-name-and-label-are-sync-or-throw.util';
 import { isFieldMetadataEntityOfType } from 'src/engine/utils/is-field-metadata-of-type.util';
 import { WorkspaceCacheStorageService } from 'src/engine/workspace-cache-storage/workspace-cache-storage.service';
@@ -272,6 +274,37 @@ export class FieldMetadataRelationService {
         );
       }
 
+      // Morph relation specific:
+      // to keep the fieldMetadata API simple
+      // we decided to override the targetFieldMetadata with the existing one
+      // in case the relation target is a morph relation
+      const isRelationTargetMorphRelation =
+        isFieldMetadataTypeMorphRelation(targetFieldMetadata);
+
+      const targetObjectMetadataFields = Object.values(
+        targetObjectMetadata.fieldsById,
+      );
+
+      const targetObjectMetadataWithoutDuplicates =
+        filterMorphRelationDuplicateFieldsDTO<FieldMetadataEntity>(
+          targetObjectMetadataFields,
+        );
+      const targetFieldMetadataSelected =
+        targetObjectMetadataWithoutDuplicates.find(
+          (fieldMetadata) => fieldMetadata.name === targetFieldMetadata.name,
+        );
+
+      if (!isDefined(targetFieldMetadataSelected)) {
+        throw new FieldMetadataException(
+          `Target field metadata not found for field metadata ${id}`,
+          FieldMetadataExceptionCode.FIELD_METADATA_RELATION_MALFORMED,
+        );
+      }
+
+      const targetFieldMetadataOverride = isRelationTargetMorphRelation
+        ? targetFieldMetadataSelected
+        : targetFieldMetadata;
+
       return {
         sourceObjectMetadata:
           getObjectMetadataFromObjectMetadataItemWithFieldMaps(
@@ -282,7 +315,7 @@ export class FieldMetadataRelationService {
           getObjectMetadataFromObjectMetadataItemWithFieldMaps(
             targetObjectMetadata,
           ) as ObjectMetadataEntity,
-        targetFieldMetadata: targetFieldMetadata as FieldMetadataEntity,
+        targetFieldMetadata: targetFieldMetadataOverride as FieldMetadataEntity,
       };
     });
   }

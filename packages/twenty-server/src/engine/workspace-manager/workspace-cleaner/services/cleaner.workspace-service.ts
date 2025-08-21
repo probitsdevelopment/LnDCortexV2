@@ -28,7 +28,7 @@ import {
   WorkspaceCleanerException,
   WorkspaceCleanerExceptionCode,
 } from 'src/engine/workspace-manager/workspace-cleaner/exceptions/workspace-cleaner.exception';
-import { WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
+import { type WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
 
 @Injectable()
 export class CleanerWorkspaceService {
@@ -122,8 +122,8 @@ export class CleanerWorkspaceService {
       locale: workspaceMember.locale,
     };
     const emailTemplate = WarnSuspendedWorkspaceEmail(emailData);
-    const html = await render(emailTemplate, { pretty: true });
-    const text = await render(emailTemplate, { plainText: true });
+    const html = render(emailTemplate, { pretty: true });
+    const text = render(emailTemplate, { plainText: true });
 
     i18n.activate(workspaceMember.locale);
 
@@ -198,8 +198,8 @@ export class CleanerWorkspaceService {
       locale: workspaceMember.locale,
     };
     const emailTemplate = CleanSuspendedWorkspaceEmail(emailData);
-    const html = await render(emailTemplate, { pretty: true });
-    const text = await render(emailTemplate, { plainText: true });
+    const html = render(emailTemplate, { pretty: true });
+    const text = render(emailTemplate, { plainText: true });
 
     this.emailService.send({
       to: workspaceMember.userEmail,

@@ -10,7 +10,6 @@ describe('getWorkflowVersionDiagram', () => {
     const result = getWorkflowVersionDiagram({
       workflowVersion: undefined,
       isEditable: true,
-      isWorkflowFilteringEnabled: true,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -35,7 +34,6 @@ describe('getWorkflowVersionDiagram', () => {
         workflowId: '',
       },
       isEditable: true,
-      isWorkflowFilteringEnabled: true,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -45,6 +43,10 @@ describe('getWorkflowVersionDiagram', () => {
     {
       "data": {
         "nodeType": "empty-trigger",
+        "position": {
+          "x": 0,
+          "y": 0,
+        },
       },
       "id": "trigger",
       "position": {
@@ -76,7 +78,6 @@ describe('getWorkflowVersionDiagram', () => {
         workflowId: '',
       },
       isEditable: true,
-      isWorkflowFilteringEnabled: true,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -85,9 +86,15 @@ describe('getWorkflowVersionDiagram', () => {
   "nodes": [
     {
       "data": {
+        "hasNextStepIds": false,
         "icon": "IconPlaylistAdd",
         "name": "Record is created",
         "nodeType": "trigger",
+        "position": {
+          "x": 0,
+          "y": 0,
+        },
+        "stepId": "trigger",
         "triggerType": "DATABASE_EVENT",
       },
       "id": "trigger",
@@ -133,12 +140,12 @@ describe('getWorkflowVersionDiagram', () => {
           name: 'Company created',
           settings: { eventName: 'company.created', outputSchema: {} },
           type: 'DATABASE_EVENT',
+          nextStepIds: ['step-1'],
         },
         updatedAt: '',
         workflowId: '',
       },
       isEditable: true,
-      isWorkflowFilteringEnabled: true,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -148,11 +155,11 @@ describe('getWorkflowVersionDiagram', () => {
       "data": {
         "edgeType": "default",
       },
-      "deletable": false,
+      "deletable": true,
       "id": "8f3b2121-f194-4ba4-9fbf-0",
-      "markerEnd": "workflow-edge-arrow-rounded",
-      "markerStart": "workflow-edge-gray-circle",
-      "selectable": false,
+      "markerEnd": "workflow-edge-branch-arrow",
+      "markerStart": undefined,
+      "selectable": true,
       "source": "trigger",
       "target": "step-1",
       "type": "empty-filter--editable",
@@ -161,9 +168,15 @@ describe('getWorkflowVersionDiagram', () => {
   "nodes": [
     {
       "data": {
+        "hasNextStepIds": true,
         "icon": "IconPlaylistAdd",
         "name": "Company created",
         "nodeType": "trigger",
+        "position": {
+          "x": 0,
+          "y": 0,
+        },
+        "stepId": "trigger",
         "triggerType": "DATABASE_EVENT",
       },
       "id": "trigger",
@@ -175,8 +188,14 @@ describe('getWorkflowVersionDiagram', () => {
     {
       "data": {
         "actionType": "CODE",
+        "hasNextStepIds": false,
         "name": "",
         "nodeType": "action",
+        "position": {
+          "x": 0,
+          "y": 150,
+        },
+        "stepId": "step-1",
       },
       "id": "step-1",
       "position": {

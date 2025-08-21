@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { FlatIndexFieldMetadata } from 'src/engine/workspace-manager/workspace-migration-v2/types/flat-index-field-metadata';
+import { type FlatIndexFieldMetadata } from 'src/engine/workspace-manager/workspace-migration-v2/types/flat-index-field-metadata';
 
 type FlatIndexFieldMetadataOverrides = Required<
   Pick<
@@ -12,7 +12,7 @@ type FlatIndexFieldMetadataOverrides = Required<
 export const getFlatIndexFieldMetadataMock = (
   overrides: FlatIndexFieldMetadataOverrides,
 ): FlatIndexFieldMetadata => {
-  const createdAt = faker.date.anytime();
+  const createdAt = '2024-01-01T00:00:00.000Z' as unknown as Date;
 
   return {
     createdAt,

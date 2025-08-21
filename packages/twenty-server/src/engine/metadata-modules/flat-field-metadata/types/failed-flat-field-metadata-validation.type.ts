@@ -1,11 +1,9 @@
-import { FieldMetadataException } from 'src/engine/metadata-modules/field-metadata/field-metadata.exception';
-import { ObjectMetadataException } from 'src/engine/metadata-modules/object-metadata/object-metadata.exception';
-import { InvalidMetadataException } from 'src/engine/metadata-modules/utils/exceptions/invalid-metadata.exception';
+import { type FieldMetadataMinimalInformation } from 'src/engine/metadata-modules/flat-field-metadata/types/field-metadata-minimal-information.type';
+import { type FlatFieldMetadataValidationError } from 'src/engine/metadata-modules/flat-field-metadata/types/flat-field-metadata-validation-error.type';
+import { type WorkspaceMigrationFieldActionTypeV2 } from 'src/engine/workspace-manager/workspace-migration-v2/workspace-migration-builder-v2/types/workspace-migration-field-action-v2';
 
 export type FailedFlatFieldMetadataValidation = {
-  status: 'fail';
-  error:
-    | FieldMetadataException
-    | ObjectMetadataException
-    | InvalidMetadataException;
+  type: WorkspaceMigrationFieldActionTypeV2;
+  errors: FlatFieldMetadataValidationError[];
+  fieldMinimalInformation: Partial<FieldMetadataMinimalInformation>;
 };

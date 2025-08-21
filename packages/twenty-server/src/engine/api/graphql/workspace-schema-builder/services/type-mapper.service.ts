@@ -3,20 +3,21 @@ import { GraphQLISODateTime } from '@nestjs/graphql';
 
 import {
   GraphQLBoolean,
-  GraphQLEnumType,
+  type GraphQLEnumType,
   GraphQLID,
-  GraphQLInputObjectType,
-  GraphQLInputType,
+  type GraphQLInputObjectType,
+  type GraphQLInputType,
   GraphQLList,
   GraphQLNonNull,
-  GraphQLScalarType,
+  type GraphQLScalarType,
   GraphQLString,
-  GraphQLType,
+  type GraphQLType,
 } from 'graphql';
+import GraphQLJSON from 'graphql-type-json';
 import { FieldMetadataType } from 'twenty-shared/types';
 
 import {
-  FieldMetadataSettings,
+  type FieldMetadataSettings,
   NumberDataType,
 } from 'src/engine/metadata-modules/field-metadata/interfaces/field-metadata-settings.interface';
 
@@ -41,7 +42,6 @@ import {
   UUIDScalarType,
 } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 import { PositionScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars/position.scalar';
-import { RawJSONScalar } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars/raw-json.scalar';
 import { getNumberFilterType } from 'src/engine/api/graphql/workspace-schema-builder/utils/get-number-filter-type.util';
 import { getNumberScalarType } from 'src/engine/api/graphql/workspace-schema-builder/utils/get-number-scalar-type.util';
 
@@ -87,7 +87,7 @@ export class TypeMapperService {
       ],
       [FieldMetadataType.NUMERIC, BigFloatScalarType],
       [FieldMetadataType.POSITION, PositionScalarType],
-      [FieldMetadataType.RAW_JSON, RawJSONScalar],
+      [FieldMetadataType.RAW_JSON, GraphQLJSON],
       [
         FieldMetadataType.ARRAY,
         StringArrayScalarType as unknown as GraphQLScalarType,

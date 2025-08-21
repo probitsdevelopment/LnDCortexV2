@@ -4,11 +4,11 @@ import { RelationOnDeleteAction } from 'src/engine/metadata-modules/field-metada
 import { RelationType } from 'src/engine/metadata-modules/field-metadata/interfaces/relation-type.interface';
 
 import { FieldActorSource } from 'src/engine/metadata-modules/field-metadata/composite-types/actor.composite-type';
-import { FieldMetadataComplexOption } from 'src/engine/metadata-modules/field-metadata/dtos/options.input';
-import { FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
-import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
-import { ObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/types/object-metadata-item-with-field-maps';
-import { ObjectMetadataMaps } from 'src/engine/metadata-modules/types/object-metadata-maps';
+import { type FieldMetadataComplexOption } from 'src/engine/metadata-modules/field-metadata/dtos/options.input';
+import { type FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
+import { type ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
+import { type ObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/types/object-metadata-item-with-field-maps';
+import { type ObjectMetadataMaps } from 'src/engine/metadata-modules/types/object-metadata-maps';
 import { getMockFieldMetadataEntity } from 'src/utils/__test__/get-field-metadata-entity.mock';
 
 export const FIELD_LINKS_MOCK_NAME = 'fieldLinks';
@@ -141,10 +141,12 @@ export const fieldRelationMock = getMockFieldMetadataEntity({
     nameSingular: 'relationTargetObject',
     namePlural: 'relationTargetObjects',
   } as ObjectMetadataEntity,
+  relationTargetObjectMetadataId: 'relationTargetObjectId',
   relationTargetFieldMetadata: {
     id: 'relationTargetFieldId',
     name: 'relationTargetField',
   } as FieldMetadataEntity,
+  relationTargetFieldMetadataId: 'relationTargetFieldId',
   isLabelSyncedWithName: true,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -414,7 +416,7 @@ export const fieldPhonesMock = getMockFieldMetadataEntity({
   updatedAt: new Date(),
 });
 
-export const fields = [
+const FIELDS_MOCK = [
   fieldUuidMock,
   fieldTextMock,
   fieldPhonesMock,
@@ -455,21 +457,21 @@ export const objectMetadataItemMock: ObjectMetadataEntity = {
   isSystem: false,
   isAuditLogged: true,
   isSearchable: true,
-  fields,
+  fields: FIELDS_MOCK,
   createdAt: new Date(),
   updatedAt: new Date(),
 } as ObjectMetadataEntity;
 
 export const objectMetadataMapItemMock: ObjectMetadataItemWithFieldMaps = {
   ...objectMetadataItemMock,
-  fieldsById: fields.reduce(
+  fieldsById: FIELDS_MOCK.reduce(
     (acc, field) => ({
       ...acc,
       [field.id]: field,
     }),
     {},
   ),
-  fieldIdByName: fields.reduce(
+  fieldIdByName: FIELDS_MOCK.reduce(
     (acc, field) => ({
       ...acc,
       [field.name]: field.id,
