@@ -1,0 +1,31 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npx nx build twenty-front"
+  },
+  "deploy": {
+    "startCommand": "npx nx run twenty-front:start",
+    "numReplicas": 1
+  },
+  "environments": {
+    "development": {
+      "variables": {
+        "NODE_ENV": "development",
+        "NIXPACKS_NX_APP_NAME": "twenty-front"
+      }
+    },
+    "testing": {
+      "variables": {
+        "NODE_ENV": "test",
+        "NIXPACKS_NX_APP_NAME": "twenty-front"
+      }
+    },
+    "production": {
+      "variables": {
+        "NODE_ENV": "production",
+        "NIXPACKS_NX_APP_NAME": "twenty-front"
+      }
+    }
+  }
+}

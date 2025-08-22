@@ -1,0 +1,32 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npx nx build twenty-server"
+  },
+  "deploy": {
+    "startCommand": "npx nx run twenty-server:worker",
+    "numReplicas": 1,
+    "sleepApplication": false
+  },
+  "environments": {
+    "development": {
+      "variables": {
+        "NODE_ENV": "development",
+        "NIXPACKS_NX_APP_NAME": "twenty-server"
+      }
+    },
+    "testing": {
+      "variables": {
+        "NODE_ENV": "test", 
+        "NIXPACKS_NX_APP_NAME": "twenty-server"
+      }
+    },
+    "production": {
+      "variables": {
+        "NODE_ENV": "production",
+        "NIXPACKS_NX_APP_NAME": "twenty-server"
+      }
+    }
+  }
+}

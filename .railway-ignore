@@ -1,0 +1,52 @@
+# Railway ignore file
+# Add files and directories you want Railway to ignore during builds
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# Build artifacts (will be rebuilt on Railway)
+node_modules/
+dist/
+build/
+.cache/
+.nx/cache/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+
+# Storybook
+storybook-static/
+
+# Logs
+*.log
+logs/
+
+# Docker (since we're using Railway's build system)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Local storage
+.local-storage/
