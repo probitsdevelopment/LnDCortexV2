@@ -2,34 +2,22 @@ name: Deploy to Railway
 
 on:
   push:
-    branches:
-      - main        # Deploy to production
-      - develop     # Deploy to development  
-      - staging     # Deploy to testing
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - test
-          - prod
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
 jobs:
-  detect-changes:
+  changes:
     runs-on: ubuntu-latest
     outputs:
-      frontend-changed: ${{ steps.changes.outputs.frontend }}
-      backend-changed: ${{ steps.changes.outputs.backend }}
-      shared-changed: ${{ steps.changes.outputs.shared }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+      server: ${{ steps.changes.outputs.server }}
+      worker: ${{ steps.changes.outputs.worker }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
       - uses: dorny/paths-filter@v2
         id: changes
         with:
@@ -37,88 +25,106 @@ jobs:
             frontend:
               - 'packages/twenty-front/**'
               - 'packages/twenty-ui/**'
-            backend:
-              - 'packages/twenty-server/**'
-              - 'packages/twenty-emails/**'
-            shared:
               - 'packages/twenty-shared/**'
-              - 'package.json'
-              - 'yarn.lock'
-              - 'nx.json'
-
-  deploy-backend:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.backend-changed == 'true' || needs.detect-changes.outputs.shared-changed == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Determine environment
-        id: env
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
-            echo "environment=test" >> $GITHUB_OUTPUT
-          else
-            echo "environment=dev" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy Backend
-        run: |
-          cp railway-server.json railway.json
-          railway up --service twenty-backend-${{ steps.env.outputs.environment }}
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Deploy Worker
-        run: |
-          cp railway-worker.json railway.json  
-          railway up --service twenty-worker-${{ steps.env.outputs.environment }}
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+              - 'packages/twenty-utils/**'
+              - 'railway-front.json'
+            server:
+              - 'packages/twenty-server/**'
+              - 'packages/twenty-shared/**'
+              - 'packages/twenty-emails/**'
+              - 'packages/twenty-utils/**'
+              - 'railway-server.json'
+            worker:
+              - 'packages/twenty-server/**'
+              - 'packages/twenty-shared/**'
+              - 'packages/twenty-emails/**'
+              - 'packages/twenty-utils/**'
+              - 'railway-worker.json'
 
   deploy-frontend:
-    needs: [detect-changes, deploy-backend]
-    if: always() && (needs.detect-changes.outputs.frontend-changed == 'true' || needs.detect-changes.outputs.shared-changed == 'true')
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Determine environment
-        id: env
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
-            echo "environment=test" >> $GITHUB_OUTPUT
-          else
-            echo "environment=dev" >> $GITHUB_OUTPUT
-          fi
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Deploy Frontend
+      - name: Deploy Frontend to Railway
         run: |
-          cp railway-front.json railway.json
-          railway up --service twenty-frontend-${{ steps.env.outputs.environment }}
+          export RAILWAY_CONFIG_FILE=railway-front.json
+          railway up --service twenty-front
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-  notify-deployment:
-    needs: [deploy-backend, deploy-frontend]
-    if: always()
+  deploy-server:
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Server to Railway
+        run: |
+          export RAILWAY_CONFIG_FILE=railway-server.json
+          railway up --service twenty-server
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-worker:
+    needs: changes
+    if: ${{ needs.changes.outputs.worker == 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Worker to Railway
+        run: |
+          export RAILWAY_CONFIG_FILE=railway-worker.json
+          railway up --service twenty-worker
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  health-check:
+    needs: [deploy-frontend, deploy-server, deploy-worker]
+    if: always() && (needs.deploy-frontend.result == 'success' || needs.deploy-server.result == 'success' || needs.deploy-worker.result == 'success')
     runs-on: ubuntu-latest
     steps:
-      - name: Deployment Status
+      - name: Wait for deployments
+        run: sleep 60
+
+      - name: Health Check Frontend
+        if: ${{ needs.deploy-frontend.result == 'success' }}
         run: |
-          if [[ "${{ needs.deploy-backend.result }}" == "success" && "${{ needs.deploy-frontend.result }}" == "success" ]]; then
-            echo "✅ Deployment successful!"
-          else
-            echo "❌ Deployment failed!"
-            exit 1
-          fi
+          curl -f ${{ vars.FRONTEND_URL }}/health || exit 1
+
+      - name: Health Check Server
+        if: ${{ needs.deploy-server.result == 'success' }}
+        run: |
+          curl -f ${{ vars.SERVER_URL }}/healthz || exit 1
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: |
+            Railway deployment completed!
+            Frontend: ${{ needs.deploy-frontend.result }}
+            Server: ${{ needs.deploy-server.result }}
+            Worker: ${{ needs.deploy-worker.result }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

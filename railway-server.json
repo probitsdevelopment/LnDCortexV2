@@ -1,32 +1,31 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npx nx build twenty-server"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "packages/twenty-server/Dockerfile"
   },
   "deploy": {
-    "startCommand": "npx nx run twenty-server:start",
     "healthcheckPath": "/healthz",
-    "healthcheckTimeout": 300,
+    "healthcheckTimeout": 60,
     "numReplicas": 1
   },
   "environments": {
-    "development": {
-      "variables": {
-        "NODE_ENV": "development",
-        "NIXPACKS_NX_APP_NAME": "twenty-server"
-      }
-    },
-    "testing": {
-      "variables": {
-        "NODE_ENV": "test",
-        "NIXPACKS_NX_APP_NAME": "twenty-server"
-      }
-    },
     "production": {
       "variables": {
         "NODE_ENV": "production",
-        "NIXPACKS_NX_APP_NAME": "twenty-server"
+        "PORT": "3000",
+        "SERVER_URL": "https://${{RAILWAY_PUBLIC_DOMAIN}}",
+        "FRONT_BASE_URL": "https://${{twenty-front.RAILWAY_PUBLIC_DOMAIN}}",
+        "DATABASE_URL": "${{Postgres.DATABASE_URL}}",
+        "REDIS_URL": "${{Redis.REDIS_URL}}",
+        "ACCESS_TOKEN_SECRET": "${{RAILWAY_PROJECT_ID}}",
+        "LOGIN_TOKEN_SECRET": "${{RAILWAY_PROJECT_ID}}",
+        "REFRESH_TOKEN_SECRET": "${{RAILWAY_PROJECT_ID}}",
+        "FILE_TOKEN_SECRET": "${{RAILWAY_PROJECT_ID}}",
+        "SIGN_IN_PREFILLED": "false",
+        "STORAGE_TYPE": "local",
+        "MESSAGE_QUEUE_TYPE": "bull-mq",
+        "LOGGER_DRIVER": "console"
       }
     }
   }
